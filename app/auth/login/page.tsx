@@ -3,19 +3,19 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Zap, Eye, EyeOff, Loader2 } from 'lucide-react';
-import toast, { Toaster } from 'react-hot-toast';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const router = useRouter();
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleLogin = async () => {
+    setError('');
     if (!email || !password) {
-      toast.error('Please enter email and password');
+      setError('Please enter email and password');
       return;
     }
     
@@ -30,25 +30,20 @@ export default function LoginPage() {
       const data = await res.json();
       
       if (!res.ok) {
-        toast.error(data.error || 'Login failed');
+        setError(data.error || 'Login failed');
         setLoading(false);
         return;
       }
       
-      toast.success('Signed in! Redirecting...');
-      // Use setTimeout to ensure redirect happens after state update
-      setTimeout(() => {
-        window.location.href = '/tenant/dashboard';
-      }, 500);
+      // Direct page redirect
+      window.location.href = '/tenant/dashboard';
     } catch (err) {
-      toast.error('Connection error - please try again');
+      setError('Connection error');
       setLoading(false);
     }
   };
 
   return (
-    <>
-    <Toaster position="bottom-right" />
     <div className="min-h-screen bg-gradient-to-br from-violet-50 via-white to-indigo-50 dark:from-slate-950 dark:via-slate-900 dark:to-violet-950 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
@@ -62,14 +57,18 @@ export default function LoginPage() {
         </div>
 
         <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-800 p-8">
-          <form onSubmit={handleLogin} className="space-y-4">
+          {error && (
+            <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm rounded-lg">
+              {error}
+            </div>
+          )}
+          <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium mb-1.5">Email</label>
               <input 
                 type="email" 
                 value={email} 
                 onChange={e=>setEmail(e.target.value)} 
-                required 
                 placeholder="you@example.com" 
                 className="w-full px-3.5 py-2.5 rounded-xl border border-border bg-background text-sm font-medium focus:outline-none focus:ring-2 focus:ring-violet-500" 
               />
@@ -84,7 +83,6 @@ export default function LoginPage() {
                   type={showPass?'text':'password'} 
                   value={password} 
                   onChange={e=>setPassword(e.target.value)} 
-                  required 
                   placeholder="••••••••" 
                   className="w-full px-3.5 py-2.5 rounded-xl border border-border bg-background text-sm font-medium focus:outline-none focus:ring-2 focus:ring-violet-500 pr-10" 
                 />
@@ -109,10 +107,9 @@ export default function LoginPage() {
             <p className="text-center text-sm text-muted-foreground">
               No account? <Link href="/auth/signup" className="text-violet-600 font-medium hover:underline">Create workspace</Link>
             </p>
-          </form>
+          </div>
         </div>
       </div>
     </div>
-    </>
   );
 }
