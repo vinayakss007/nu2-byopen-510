@@ -1,6 +1,17 @@
 'use client';
 
-export default function GlobalError({ error, reset }: { error: Error; reset: () => void }) {
+import * as Sentry from "@sentry/nextjs";
+import { useEffect } from "react";
+
+export default function GlobalError({
+  error,
+}: {
+  error: Error & { digest?: string };
+}) {
+  useEffect(() => {
+    Sentry.captureException(error);
+  }, [error]);
+
   return (
     <html lang="en">
       <body>
@@ -21,7 +32,7 @@ export default function GlobalError({ error, reset }: { error: Error; reset: () 
               {error?.message || 'A critical error occurred.'}
             </p>
             <button 
-              onClick={() => reset()}
+              onClick={() => window.location.reload()}
               style={{ 
                 padding: '10px 20px', 
                 backgroundColor: '#7c3aed', 
@@ -31,7 +42,7 @@ export default function GlobalError({ error, reset }: { error: Error; reset: () 
                 cursor: 'pointer' 
               }}
             >
-              Try again
+              Reload page
             </button>
           </div>
         </div>
