@@ -95,7 +95,8 @@ export default function LoginPage() {
               </div>
             </div>
             <button 
-              type="submit"
+              type="button"
+              onClick={handleLogin}
               disabled={loading}
               className="w-full py-2.5 bg-gradient-to-r from-violet-600 to-indigo-600 text-white rounded-xl text-sm font-semibold hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-2"
             >
