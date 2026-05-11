@@ -335,6 +335,10 @@ export default function SuperAdminTenantsPage() {
                         className="flex items-center gap-1 px-2 py-1 rounded-lg border border-violet-300/30 dark:border-violet-500/30 text-[10px] text-violet-600 dark:text-violet-400 hover:bg-violet-500/10 transition-colors">
                         <Edit className="w-3 h-3"/>Edit
                       </button>
+                      <Link href={`/superadmin/tenants/${t.id}/roles`} title="Manage roles & permissions"
+                        className="flex items-center gap-1 px-2 py-1 rounded-lg border border-violet-300/30 dark:border-violet-500/30 text-[10px] text-violet-600 dark:text-violet-400 hover:bg-violet-500/10 transition-colors">
+                        <Shield className="w-3 h-3"/>Roles
+                      </Link>
                       {t.status==='trialing'&&(
                         <button onClick={()=>extendTrial(t.id)} title="Extend trial"
                           className="px-2 py-1 rounded-lg border border-amber-300/30 dark:border-amber-500/30 text-[10px] text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 transition-colors">+Days</button>

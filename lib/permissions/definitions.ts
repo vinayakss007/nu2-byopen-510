@@ -84,7 +84,31 @@ export const PERMISSIONS: Permission[] = [
 
   // ── Quotes ──────────────────────────────────────────────
   { id: 'quotes.view',         label: 'View Quotes',         description: 'Access quotes & proposals',     category: 'Sales',   dangerLevel: 'safe' },
-  { id: 'quotes.manage',       label: 'Manage Quotes',       description: 'Create/edit/send quotes',       category: 'Sales',   dangerLevel: 'moderate' },
+  { id: 'quotes.manage',       label: 'Manage Quotes',        description: 'Create/edit/send quotes',       category: 'Sales',   dangerLevel: 'moderate' },
+
+  // ── Invoices ──────────────────────────────────────────────
+  { id: 'invoices.view',        label: 'View Invoices',       description: 'Access invoices & billing',       category: 'Sales',   dangerLevel: 'safe' },
+  { id: 'invoices.create',      label: 'Create Invoices',     description: 'Create new invoices',            category: 'Sales',   dangerLevel: 'moderate' },
+  { id: 'invoices.edit',        label: 'Edit Invoices',       description: 'Edit/update invoices',           category: 'Sales',   dangerLevel: 'moderate' },
+  { id: 'invoices.delete',      label: 'Delete Invoices',     description: 'Remove invoices permanently',  category: 'Sales',   dangerLevel: 'danger' },
+  { id: 'invoices.send',        label: 'Send Invoices',      description: 'Send invoices to clients',      category: 'Sales',   dangerLevel: 'moderate' },
+
+  // ── Orders ────────────────────────────────────────────────
+  { id: 'orders.view',          label: 'View Orders',         description: 'Access orders & shipments',     category: 'Sales',   dangerLevel: 'safe' },
+  { id: 'orders.create',        label: 'Create Orders',      description: 'Create new orders',             category: 'Sales',   dangerLevel: 'moderate' },
+  { id: 'orders.edit',          label: 'Edit Orders',         description: 'Edit/update orders',           category: 'Sales',   dangerLevel: 'moderate' },
+  { id: 'orders.delete',        label: 'Delete Orders',       description: 'Remove orders permanently',    category: 'Sales',   dangerLevel: 'danger' },
+
+  // ── Contracts ─────────────────────────────────────────────
+  { id: 'contracts.view',       label: 'View Contracts',      description: 'Access contracts & agreements', category: 'Sales',   dangerLevel: 'safe' },
+  { id: 'contracts.create',     label: 'Create Contracts',   description: 'Create new contracts',          category: 'Sales',   dangerLevel: 'moderate' },
+  { id: 'contracts.edit',        label: 'Edit Contracts',     description: 'Edit/update contracts',        category: 'Sales',   dangerLevel: 'moderate' },
+  { id: 'contracts.delete',     label: 'Delete Contracts',   description: 'Remove contracts permanently', category: 'Sales',   dangerLevel: 'danger' },
+  { id: 'contracts.sign',       label: 'Sign Contracts',     description: 'Digitally sign contracts',     category: 'Sales',   dangerLevel: 'danger' },
+
+  // ── Subscriptions ─────────────────────────────────────────
+  { id: 'subscriptions.view',   label: 'View Subscriptions',  description: 'Access subscriptions',          category: 'Sales',   dangerLevel: 'safe' },
+  { id: 'subscriptions.manage',label: 'Manage Subscriptions',description: 'Create/manage subscriptions', category: 'Sales',   dangerLevel: 'moderate' },
 
   // ── Segments ──────────────────────────────────────────────
   { id: 'segments.view',       label: 'View Segments',       description: 'Access contact segments',       category: 'Marketing', dangerLevel: 'safe' },
@@ -96,13 +120,21 @@ export const PERMISSION_CATEGORIES = [...new Set(PERMISSIONS.map(p => p.category
 // ── Default permission sets per role ─────────────────────────
 export const DEFAULT_ROLE_PERMISSIONS: Record<string, Record<string, boolean>> = {
   admin: Object.fromEntries(PERMISSIONS.map(p => [p.id, true])),
-  manager: Object.fromEntries(PERMISSIONS.filter(p => p.dangerLevel !== 'danger' || ['contacts.delete', 'companies.delete'].includes(p.id) === false).map(p => [p.id, p.dangerLevel !== 'danger'])),
+  manager: Object.fromEntries(PERMISSIONS.filter(p =>
+    p.dangerLevel !== 'danger' ||
+    ['contacts.delete', 'companies.delete', 'invoices.delete', 'orders.delete', 'contracts.delete', 'contracts.sign', 'billing.manage'].includes(p.id) === false
+  ).map(p => [p.id, p.dangerLevel !== 'danger'])),
   sales_rep: {
     'contacts.create': true, 'contacts.edit': true, 'contacts.view_all': false,
     'leads.view': true, 'leads.create': true, 'leads.edit': true, 'leads.view_all': false,
     'deals.view': true, 'deals.create': true, 'deals.edit': true, 'deals.view_all': false, 'deals.view_value': true,
     'tasks.create': true, 'tasks.edit': true,
     'companies.create': true, 'companies.edit': true,
+    'quotes.view': true, 'quotes.manage': true,
+    'invoices.view': true, 'invoices.create': true,
+    'orders.view': true, 'orders.create': true,
+    'contracts.view': true, 'contracts.create': true,
+    'subscriptions.view': true,
     'team.view': true, 'reports.view': false,
   },
   viewer: Object.fromEntries(PERMISSIONS.map(p => [p.id, p.id.endsWith('.view') || p.id.endsWith('.view_all')])),
