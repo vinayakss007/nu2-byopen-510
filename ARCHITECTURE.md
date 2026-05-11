@@ -514,6 +514,67 @@ API keys are scoped to specific operations:
 | `tasks:read` | ✅ | ❌ | ❌ |
 | `tasks:write` | ✅ | ✅ | ❌ |
 | `tasks:all` | ✅ | ✅ | ✅ |
+| `leads:read` | ✅ | ❌ | ❌ |
+| `leads:write` | ✅ | ✅ | ❌ |
+| `leads:all` | ✅ | ✅ | ✅ |
+| `analytics:read` | ✅ | ❌ | ❌ |
+| `analytics:write` | ✅ | ✅ | ❌ |
+| `analytics:all` | ✅ | ✅ | ✅ |
+| `reports:read` | ✅ | ❌ | ❌ |
+| `reports:write` | ✅ | ✅ | ❌ |
+| `reports:all` | ✅ | ✅ | ✅ |
+| `contracts:read` | ✅ | ❌ | ❌ |
+| `contracts:write` | ✅ | ✅ | ❌ |
+| `contracts:all` | ✅ | ✅ | ✅ |
+| `invoices:read` | ✅ | ❌ | ❌ |
+| `invoices:write` | ✅ | ✅ | ❌ |
+| `invoices:all` | ✅ | ✅ | ✅ |
+| `orders:read` | ✅ | ❌ | ❌ |
+| `orders:write` | ✅ | ✅ | ❌ |
+| `orders:all` | ✅ | ✅ | ✅ |
+| `tickets:read` | ✅ | ❌ | ❌ |
+| `tickets:write` | ✅ | ✅ | ❌ |
+| `tickets:all` | ✅ | ✅ | ✅ |
+| `emails:read` | ✅ | ❌ | ❌ |
+| `emails:write` | ✅ | ✅ | ❌ |
+| `emails:all` | ✅ | ✅ | ✅ |
+| `sequences:read` | ✅ | ❌ | ❌ |
+| `sequences:write` | ✅ | ✅ | ❌ |
+| `sequences:all` | ✅ | ✅ | ✅ |
+| `workflows:read` | ✅ | ❌ | ❌ |
+| `workflows:write` | ✅ | ✅ | ❌ |
+| `workflows:all` | ✅ | ✅ | ✅ |
+| `webhooks:read` | ✅ | ❌ | ❌ |
+| `webhooks:write` | ✅ | ✅ | ❌ |
+| `webhooks:all` | ✅ | ✅ | ✅ |
+| `files:read` | ✅ | ❌ | ❌ |
+| `files:write` | ✅ | ✅ | ❌ |
+| `files:all` | ✅ | ✅ | ✅ |
+| `integrations:read` | ✅ | ❌ | ❌ |
+| `integrations:write` | ✅ | ✅ | ❌ |
+| `integrations:all` | ✅ | ✅ | ✅ |
+| `settings:read` | ✅ | ❌ | ❌ |
+| `settings:write` | ✅ | ✅ | ❌ |
+| `settings:all` | ✅ | ✅ | ✅ |
+| `members:read` | ✅ | ❌ | ❌ |
+| `members:write` | ✅ | ✅ | ❌ |
+| `members:all` | ✅ | ✅ | ✅ |
+| `roles:read` | ✅ | ❌ | ❌ |
+| `roles:write` | ✅ | ✅ | ❌ |
+| `roles:all` | ✅ | ✅ | ✅ |
+| `pipeline:read` | ✅ | ❌ | ❌ |
+| `pipeline:write` | ✅ | ✅ | ❌ |
+| `pipeline:all` | ✅ | ✅ | ✅ |
+| `*:read` | ✅ | ❌ | ❌ |
+| `*:write` | ✅ | ✅ | ❌ |
+| `*:all` or `*` | ✅ | ✅ | ✅ |
+
+### Scope Hierarchy
+
+- `:all` grants full access (read + write + delete)
+- `:write` includes read + write
+- `:read` grants read-only access
+- `*` or `*:all` grants admin-level access to all resources
 
 ### Usage
 
