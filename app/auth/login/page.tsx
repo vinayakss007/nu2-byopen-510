@@ -1,6 +1,5 @@
 'use client';
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Zap, Eye, EyeOff, Loader2 } from 'lucide-react';
 
@@ -10,10 +9,13 @@ export default function LoginPage() {
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const router = useRouter();
 
-  const handleLogin = async () => {
-    console.log('[Login] Starting...', { email: email.slice(0,3) });
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await doLogin();
+  };
+
+  const doLogin = async () => {
     setError('');
     if (!email || !password) {
       setError('Please enter email and password');
@@ -23,15 +25,13 @@ export default function LoginPage() {
     setLoading(true);
     
     try {
-      console.log('[Login] Calling API...');
       const res = await fetch('/api/auth/login', {
         method:'POST', 
         headers:{'Content-Type':'application/json'},
+        credentials: 'include',
         body: JSON.stringify({ email, password }),
       });
-      console.log('[Login] Response:', res.status);
       const data = await res.json();
-      console.log('[Login] Data:', data);
       
       if (!res.ok) {
         setError(data.error || 'Login failed');
@@ -39,80 +39,71 @@ export default function LoginPage() {
         return;
       }
       
-      console.log('[Login] Success, redirecting...');
       window.location.href = '/tenant/dashboard';
     } catch (err) {
-      console.log('[Login] Error:', err);
       setError('Connection error');
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-white to-indigo-50 dark:from-slate-950 dark:via-slate-900 dark:to-violet-950 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-white to-indigo-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2.5 mb-2">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-500/25">
-              <Zap className="w-5 h-5 text-white" strokeWidth={2.5} />
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center shadow-lg">
+              <Zap className="w-5 h-5 text-white" />
             </div>
-            <span className="text-2xl font-bold bg-gradient-to-r from-violet-700 to-indigo-600 bg-clip-text text-transparent">NuCRM</span>
+            <span className="text-2xl font-bold text-violet-700">NuCRM</span>
           </div>
-          <p className="text-sm text-muted-foreground">Sign in to your workspace</p>
+          <p className="text-sm text-gray-500">Sign in to your workspace</p>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-800 p-8">
+        <div className="bg-white rounded-2xl shadow-xl border p-8">
           {error && (
-            <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm rounded-lg">
+            <div className="mb-4 p-3 bg-red-50 text-red-600 text-sm rounded-lg">
               {error}
             </div>
           )}
-          <div className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium mb-1.5">Email</label>
               <input 
                 type="email" 
                 value={email} 
                 onChange={e=>setEmail(e.target.value)} 
-                placeholder="you@example.com" 
-                className="w-full px-3.5 py-2.5 rounded-xl border border-border bg-background text-sm font-medium focus:outline-none focus:ring-2 focus:ring-violet-500" 
+                className="w-full px-3.5 py-2.5 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-violet-500" 
               />
             </div>
             <div>
               <div className="flex items-center justify-between mb-1.5">
                 <label className="text-sm font-medium">Password</label>
-                <Link href="/auth/forgot-password" className="text-xs text-muted-foreground hover:text-violet-600">Forgot password?</Link>
               </div>
               <div className="relative">
                 <input 
                   type={showPass?'text':'password'} 
                   value={password} 
                   onChange={e=>setPassword(e.target.value)} 
-                  placeholder="••••••••" 
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-border bg-background text-sm font-medium focus:outline-none focus:ring-2 focus:ring-violet-500 pr-10" 
+                  className="w-full px-3.5 py-2.5 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 pr-10" 
                 />
                 <button 
                   type="button"
-                  onClick={()=>setShowPass(s=>!s)} 
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                  onClick={()=>setShowPass(!showPass)} 
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
                 >
                   {showPass?<EyeOff className="w-4 h-4"/>:<Eye className="w-4 h-4"/>}
                 </button>
               </div>
             </div>
             <button 
-              type="button"
-              onClick={handleLogin}
+              type="submit"
               disabled={loading}
-              className="w-full py-2.5 bg-gradient-to-r from-violet-600 to-indigo-600 text-white rounded-xl text-sm font-semibold hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-2"
+              className="w-full py-2.5 bg-violet-600 text-white rounded-xl text-sm font-semibold hover:bg-violet-700 disabled:opacity-50 flex items-center justify-center"
             >
-              {loading ? <Loader2 className="w-4 h-4 animate-spin"/> : null}
+              {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
               {loading ? 'Signing in...' : 'Sign in'}
             </button>
-            <p className="text-center text-sm text-muted-foreground">
-              No account? <Link href="/auth/signup" className="text-violet-600 font-medium hover:underline">Create workspace</Link>
-            </p>
-          </div>
+          </form>
         </div>
       </div>
     </div>
