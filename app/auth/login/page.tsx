@@ -1,80 +1,58 @@
 'use client';
-import { useState } from 'react';
-import { useEffect } from 'react';
-
 export default function LoginPage() {
-  const [msg, setMsg] = useState('');
-  const [email, setEmail] = useState('');
-  const [pwd, setPwd] = useState('');
-  const [btnDisabled, setBtnDisabled] = useState(false);
-
+  async function login(formData: FormData) {
+    const email = formData.get('email');
+    const password = formData.get('password');
+    
+    const res = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    
+    const data = await res.json();
+    
+    if (data.ok) {
+      window.location.href = '/tenant/dashboard';
+    } else {
+      alert(data.error || 'Login failed');
+    }
+  }
+  
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f5f5f5' }}>
-      <div style={{ width: 320, padding: 30, background: 'white', borderRadius: 8, boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
-        <h2 style={{ marginBottom: 20, textAlign: 'center', color: '#333' }}>NuCRM Login</h2>
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8f9fa' }}>
+      <div style={{ width: 360, padding: 40, background: 'white', borderRadius: 12, boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
+        <h1 style={{ margin: '0 0 8px', fontSize: 28, fontWeight: 700, color: '#1a1a2e', textAlign: 'center' }}>NuCRM</h1>
+        <p style={{ margin: '0 0 32px', color: '#6b7280', textAlign: 'center' }}>Sign in to your workspace</p>
         
-        {msg && (
-          <div style={{ padding: 10, marginBottom: 15, background: msg.includes('Success') ? '#d4edda' : '#f8d7da', color: msg.includes('Success') ? '#155724' : '#721c24', borderRadius: 4, fontSize: 14 }}>
-            {msg}
+        <form action={login} method="POST">
+          <div style={{ marginBottom: 20 }}>
+            <label style={{ display: 'block', marginBottom: 8, fontSize: 14, fontWeight: 500, color: '#374151' }}>Email</label>
+            <input 
+              name="email" 
+              type="email" 
+              required
+              placeholder="you@company.com"
+              style={{ width: '100%', padding: '12px 16px', border: '1px solid #e5e7eb', borderRadius: 8, fontSize: 15, boxSizing: 'border-box' }}
+            />
           </div>
-        )}
-        
-        <form 
-          action="/api/auth/login" 
-          method="POST"
-          encType="application/json"
-          onSubmit={(e) => {
-            e.preventDefault();
-            setBtnDisabled(true);
-            setMsg('Signing in...');
-            
-            fetch('/api/auth/login', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ email, password: pwd })
-            })
-            .then(r => r.json())
-            .then(d => {
-              if (d.ok) {
-                setMsg('Success! Redirecting...');
-                window.location.href = '/tenant/dashboard';
-              } else {
-                setMsg(d.error || 'Login failed');
-                setBtnDisabled(false);
-              }
-            })
-            .catch(err => {
-              setMsg('Error: ' + err.message);
-              setBtnDisabled(false);
-            });
-          }}
-        >
-          <input 
-            name="email"
-            type="email"
-            placeholder="Email address"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            required
-            style={{ width: '100%', padding: '12px', marginBottom: 12, border: '1px solid #ddd', borderRadius: 4, fontSize: 14, boxSizing: 'border-box' }}
-          />
           
-          <input 
-            name="password"
-            type="password"
-            placeholder="Password"
-            value={pwd}
-            onChange={e => setPwd(e.target.value)}
-            required
-            style={{ width: '100%', padding: '12px', marginBottom: 20, border: '1px solid #ddd', borderRadius: 4, fontSize: 14, boxSizing: 'border-box' }}
-          />
+          <div style={{ marginBottom: 24 }}>
+            <label style={{ display: 'block', marginBottom: 8, fontSize: 14, fontWeight: 500, color: '#374151' }}>Password</label>
+            <input 
+              name="password" 
+              type="password" 
+              required
+              placeholder="••••••••"
+              style={{ width: '100%', padding: '12px 16px', border: '1px solid #e5e7eb', borderRadius: 8, fontSize: 15, boxSizing: 'border-box' }}
+            />
+          </div>
           
           <button 
             type="submit"
-            disabled={btnDisabled}
-            style={{ width: '100%', padding: '12px', background: btnDisabled ? '#ccc' : '#7c3aed', color: 'white', border: 'none', borderRadius: 4, fontSize: 14, cursor: btnDisabled ? 'not-allowed' : 'pointer' }}
+            style={{ width: '100%', padding: '14px', background: 'linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)', color: 'white', border: 'none', borderRadius: 8, fontSize: 15, fontWeight: 600, cursor: 'pointer' }}
           >
-            {btnDisabled ? 'Signing in...' : 'Sign In'}
+            Sign in
           </button>
         </form>
       </div>
