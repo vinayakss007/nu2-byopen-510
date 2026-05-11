@@ -36,7 +36,10 @@ export default function LoginPage() {
       }
       
       toast.success('Signed in! Redirecting...');
-      router.push('/tenant/dashboard');
+      // Use setTimeout to ensure redirect happens after state update
+      setTimeout(() => {
+        window.location.href = '/tenant/dashboard';
+      }, 500);
     } catch (err) {
       toast.error('Connection error - please try again');
       setLoading(false);
