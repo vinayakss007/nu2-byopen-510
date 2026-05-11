@@ -17,7 +17,6 @@ const CRM_NAV = [
   { href:'/tenant/companies',     label:'Companies',    icon:Building2 },
   { href:'/tenant/deals',         label:'Deals',        icon:TrendingUp },
   { href:'/tenant/services',      label:'Services',     icon:Package },
-  { href:'/tenant/invoices',      label:'Invoices',     icon:FileText },
   { href:'/tenant/orders',        label:'Orders',       icon:ShoppingCart },
   { href:'/tenant/contracts',      label:'Contracts',    icon:FileSignature },
   { href:'/tenant/subscriptions', label:'Subscriptions',icon:RefreshCw },

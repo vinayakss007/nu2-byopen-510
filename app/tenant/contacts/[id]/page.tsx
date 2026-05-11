@@ -8,7 +8,12 @@ import {
   companies as companiesTable, 
   users as usersTable, 
   tenantMembers as tenantMembersTable,
-  dealStages
+  dealStages,
+  invoices,
+  orders,
+  contracts,
+  serviceSubscriptions,
+  quotes,
 } from '@/drizzle/schema';
 import { eq, and, sql, desc } from 'drizzle-orm';
 import { notFound } from 'next/navigation';
@@ -18,7 +23,7 @@ export default async function ContactDetailPage({ params }: { params: Promise<{ 
   const ctx = await requireTenantCtx();
   const { id: contactId } = await params;
 
-  const [contactResult, activities, deals, tasks, notes, companies, teamMembers] = await Promise.all([
+  const [contactResult, activities, deals, tasks, notes, companies, teamMembers, billingData] = await Promise.all([
     db.select({
       contact: contactsTable,
       company_name: companiesTable.name,
@@ -125,7 +130,15 @@ export default async function ContactDetailPage({ params }: { params: Promise<{ 
     .where(and(
       eq(tenantMembersTable.tenantId, ctx.tenantId),
       eq(tenantMembersTable.status, 'active')
-    ))
+    )),
+
+    Promise.all([
+      db.select().from(invoices).where(eq(invoices.contactId, contactId)).orderBy(desc(invoices.createdAt)).limit(50),
+      db.select().from(orders).where(eq(orders.contactId, contactId)).orderBy(desc(orders.createdAt)).limit(50),
+      db.select().from(contracts).where(eq(contracts.contactId, contactId)).orderBy(desc(contracts.createdAt)).limit(50),
+      db.select().from(serviceSubscriptions).where(eq(serviceSubscriptions.contactId, contactId)).orderBy(desc(serviceSubscriptions.createdAt)).limit(50),
+      db.select().from(quotes).where(eq(quotes.contactId, contactId)).orderBy(desc(quotes.createdAt)).limit(50),
+    ]),
   ]);
 
   if (!contactResult.length) notFound();
@@ -137,6 +150,8 @@ export default async function ContactDetailPage({ params }: { params: Promise<{ 
     assigned_name: contactRow.assigned_name,
     created_by_name: contactRow.created_by_name
   };
+
+  const [invoicesList, ordersList, contractsList, subscriptionsList, quotesList] = billingData;
 
   const permissions = {
     canEdit:   can(ctx, 'contacts.edit'),
@@ -154,6 +169,11 @@ export default async function ContactDetailPage({ params }: { params: Promise<{ 
       teamMembers={teamMembers}
       permissions={permissions}
       userId={ctx.userId}
+      invoices={invoicesList}
+      orders={ordersList}
+      contracts={contractsList}
+      subscriptions={subscriptionsList}
+      quotes={quotesList}
     />
   );
 }

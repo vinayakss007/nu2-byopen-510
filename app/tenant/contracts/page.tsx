@@ -1,8 +1,10 @@
 'use client';
-import { useState, useEffect } from 'react';
-import { Plus, Search, FileText, X, Calendar, DollarSign } from 'lucide-react';
+import { useState, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { Plus, Search, FileText, X, Calendar, DollarSign, User } from 'lucide-react';
 import toast from 'react-hot-toast';
 
+interface Contact { id: string; firstName: string; lastName: string; email: string | null; }
 interface Contract {
   id: string;
   title: string;
@@ -12,6 +14,7 @@ interface Contract {
   startDate: string;
   endDate: string | null;
   totalValue: string | null;
+  contactId: string | null;
 }
 
 const statusColors: Record<string, string> = {
@@ -23,13 +26,34 @@ const statusColors: Record<string, string> = {
 };
 
 export default function ContractsPage() {
+  return (
+    <Suspense fallback={<div className="p-6 text-center">Loading...</div>}>
+      <ContractsPageInner />
+    </Suspense>
+  );
+}
+
+function ContractsPageInner() {
+  const searchParams = useSearchParams();
+  const initialContactId = searchParams.get('contactId') || '';
   const [contracts, setContracts] = useState<Contract[]>([]);
+  const [contacts, setContacts] = useState<Contact[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [contactFilter, setContactFilter] = useState(initialContactId);
   const [showModal, setShowModal] = useState(false);
-  const [form, setForm] = useState({ title: '', contractType: 'service', startDate: '', endDate: '', totalValue: '', terms: '', notes: '' });
+  const [form, setForm] = useState({ contactId: initialContactId, title: '', contractType: 'service', startDate: '', endDate: '', totalValue: '', terms: '', notes: '' });
 
-  useEffect(() => { fetchContracts(); }, []);
+  useEffect(() => { fetchContracts(); fetchContacts(); }, []);
+
+  const fetchContacts = async () => {
+    try {
+      const res = await fetch('/api/tenant/contacts');
+      const data = await res.json();
+      setContacts(data.contacts || []);
+    } catch (error) { console.error('Failed to fetch contacts', error); }
+  };
 
   const fetchContracts = async () => {
     try {
@@ -61,9 +85,19 @@ export default function ContractsPage() {
     }
   };
 
-  const filtered = contracts.filter(c => c.title.toLowerCase().includes(search.toLowerCase()));
+  const getContactName = (contactId: string | null) => {
+    if (!contactId) return '-';
+    const c = contacts.find(c => c.id === contactId);
+    return c ? `${c.firstName || ''} ${c.lastName || ''}`.trim() || c.email : '-';
+  };
 
-  const activeValue = contracts.filter(c => c.status === 'active').reduce((sum, c) => sum + (parseFloat(c.totalValue) || 0), 0);
+  const filtered = contracts.filter(c =>
+    (c.title.toLowerCase().includes(search.toLowerCase()) || getContactName(c.contactId).toLowerCase().includes(search.toLowerCase())) &&
+    (!statusFilter || c.status === statusFilter) &&
+    (!contactFilter || c.contactId === contactFilter)
+  );
+
+  const activeValue = filtered.filter(c => c.status === 'active').reduce((sum, c) => sum + (parseFloat(c.totalValue) || 0), 0);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 p-6">
@@ -93,10 +127,27 @@ export default function ContractsPage() {
           </div>
         </div>
 
-        <div className="mb-4 relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-          <input type="text" placeholder="Search contracts..." value={search} onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800" />
+        <div className="flex gap-4 mb-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <input type="text" placeholder="Search contracts..." value={search} onChange={(e) => setSearch(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800" />
+          </div>
+          <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
+            className="px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800">
+            <option value="">All Status</option>
+            <option value="draft">Draft</option>
+            <option value="pending">Pending</option>
+            <option value="active">Active</option>
+            <option value="expired">Expired</option>
+          </select>
+          <select value={contactFilter} onChange={(e) => setContactFilter(e.target.value)}
+            className="px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800">
+            <option value="">All Contacts</option>
+            {contacts.map(c => (
+              <option key={c.id} value={c.id}>{c.firstName} {c.lastName}</option>
+            ))}
+          </select>
         </div>
 
         {loading ? (
@@ -111,6 +162,7 @@ export default function ContractsPage() {
                   <div>
                     <h3 className="font-semibold text-slate-900 dark:text-white">{contract.title}</h3>
                     <span className="text-xs text-slate-500">{contract.contractType}</span>
+                    <span className="flex items-center gap-1 text-xs text-slate-400 mt-1"><User className="w-3 h-3" /> {getContactName(contract.contactId)}</span>
                   </div>
                   <span className={`px-2 py-1 text-xs rounded-full ${statusColors[contract.status]}`}>{contract.status}</span>
                 </div>
@@ -133,6 +185,16 @@ export default function ContractsPage() {
               <button onClick={() => setShowModal(false)} className="p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded"><X className="w-5 h-5" /></button>
             </div>
             <form onSubmit={handleSubmit} className="p-4 space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Contact</label>
+                <select value={form.contactId} onChange={(e) => setForm({ ...form, contactId: e.target.value })}
+                  className="w-full px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-lg">
+                  <option value="">Select contact...</option>
+                  {contacts.map(c => (
+                    <option key={c.id} value={c.id}>{c.firstName} {c.lastName} {c.email ? `(${c.email})` : ''}</option>
+                  ))}
+                </select>
+              </div>
               <div>
                 <label className="block text-sm font-medium mb-1">Title *</label>
                 <input type="text" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required

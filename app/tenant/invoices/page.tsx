@@ -1,8 +1,10 @@
 'use client';
-import { useState, useEffect } from 'react';
-import { Plus, Search, Eye, Send, Download, FileText, X, CheckCircle, Clock, AlertCircle } from 'lucide-react';
+import { useState, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { Plus, Search, Eye, Send, Download, FileText, X, CheckCircle, Clock, AlertCircle, Filter } from 'lucide-react';
 import toast from 'react-hot-toast';
 
+interface Contact { id: string; firstName: string; lastName: string; email: string | null; }
 interface Invoice {
   id: string;
   invoiceNumber: string;
@@ -13,6 +15,7 @@ interface Invoice {
   totalAmount: string;
   balanceDue: string;
   contactId: string | null;
+  contact?: { firstName: string | null; lastName: string | null };
 }
 
 const statusColors: Record<string, string> = {
@@ -25,15 +28,19 @@ const statusColors: Record<string, string> = {
   cancelled: 'bg-gray-100 text-gray-700',
 };
 
-export default function InvoicesPage() {
+function InvoicesPageInner() {
+  const searchParams = useSearchParams();
+  const initialContactId = searchParams.get('contactId') || '';
   const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [contacts, setContacts] = useState<Contact[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
+  const [contactFilter, setContactFilter] = useState(initialContactId);
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState({
     title: '',
-    contactId: '',
+    contactId: initialContactId,
     issueDate: new Date().toISOString().split('T')[0],
     dueDate: '',
     notes: '',
@@ -43,7 +50,15 @@ export default function InvoicesPage() {
     taxRate: '0',
   });
 
-  useEffect(() => { fetchInvoices(); }, []);
+  useEffect(() => { fetchInvoices(); fetchContacts(); }, []);
+
+  const fetchContacts = async () => {
+    try {
+      const res = await fetch('/api/tenant/contacts');
+      const data = await res.json();
+      setContacts(data.contacts || []);
+    } catch (error) { console.error('Failed to fetch contacts', error); }
+  };
 
   const fetchInvoices = async () => {
     try {
@@ -83,12 +98,19 @@ export default function InvoicesPage() {
     setForm({ ...form, items });
   };
 
-  const filtered = invoices.filter(i => 
-    i.invoiceNumber.toLowerCase().includes(search.toLowerCase()) &&
-    (!statusFilter || i.status === statusFilter)
+  const getContactName = (contactId: string | null) => {
+    if (!contactId) return '-';
+    const c = contacts.find(c => c.id === contactId);
+    return c ? `${c.firstName || ''} ${c.lastName || ''}`.trim() || c.email : '-';
+  };
+
+  const filtered = invoices.filter(i =>
+    (i.invoiceNumber.toLowerCase().includes(search.toLowerCase()) || getContactName(i.contactId).toLowerCase().includes(search.toLowerCase())) &&
+    (!statusFilter || i.status === statusFilter) &&
+    (!contactFilter || i.contactId === contactFilter)
   );
 
-  const totalOutstanding = invoices.filter(i => !['paid', 'cancelled'].includes(i.status)).reduce((sum, i) => sum + parseFloat(i.balanceDue), 0);
+  const totalOutstanding = filtered.filter(i => !['paid', 'cancelled'].includes(i.status)).reduce((sum, i) => sum + parseFloat(i.balanceDue), 0);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 p-6">
@@ -136,6 +158,13 @@ export default function InvoicesPage() {
             <option value="paid">Paid</option>
             <option value="overdue">Overdue</option>
           </select>
+          <select value={contactFilter} onChange={(e) => setContactFilter(e.target.value)}
+            className="px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800">
+            <option value="">All Contacts</option>
+            {contacts.map(c => (
+              <option key={c.id} value={c.id}>{c.firstName} {c.lastName}</option>
+            ))}
+          </select>
         </div>
 
         {loading ? (
@@ -148,6 +177,7 @@ export default function InvoicesPage() {
               <thead className="bg-slate-50 dark:bg-slate-700/50">
                 <tr>
                   <th className="px-4 py-3 text-left text-sm font-medium">Invoice #</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium">Contact</th>
                   <th className="px-4 py-3 text-left text-sm font-medium">Title</th>
                   <th className="px-4 py-3 text-left text-sm font-medium">Date</th>
                   <th className="px-4 py-3 text-left text-sm font-medium">Amount</th>
@@ -160,6 +190,7 @@ export default function InvoicesPage() {
                 {filtered.map((invoice) => (
                   <tr key={invoice.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/30">
                     <td className="px-4 py-3 font-mono text-sm">{invoice.invoiceNumber}</td>
+                    <td className="px-4 py-3 text-sm">{getContactName(invoice.contactId)}</td>
                     <td className="px-4 py-3">{invoice.title || '-'}</td>
                     <td className="px-4 py-3 text-sm">{new Date(invoice.issueDate).toLocaleDateString()}</td>
                     <td className="px-4 py-3 font-medium">${parseFloat(invoice.totalAmount).toFixed(2)}</td>
@@ -203,6 +234,16 @@ export default function InvoicesPage() {
                   <input type="date" value={form.issueDate} onChange={(e) => setForm({ ...form, issueDate: e.target.value })} required
                     className="w-full px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-lg" />
                 </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Contact</label>
+                <select value={form.contactId} onChange={(e) => setForm({ ...form, contactId: e.target.value })}
+                  className="w-full px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-lg">
+                  <option value="">Select contact...</option>
+                  {contacts.map(c => (
+                    <option key={c.id} value={c.id}>{c.firstName} {c.lastName} {c.email ? `(${c.email})` : ''}</option>
+                  ))}
+                </select>
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">Due Date</label>
@@ -262,5 +303,13 @@ export default function InvoicesPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function InvoicesPage() {
+  return (
+    <Suspense fallback={<div className="p-6 text-center">Loading...</div>}>
+      <InvoicesPageInner />
+    </Suspense>
   );
 }
