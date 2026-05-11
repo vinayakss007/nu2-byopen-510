@@ -1,0 +1,16 @@
+[Unit]
+Description=NuCRM Application
+After=network.target postgresql.service
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/nu2-byopen-510
+Environment=NODE_ENV=production
+Environment=PORT=3000
+ExecStart=/home/ubuntu/nu2-byopen-510/node_modules/.bin/next start
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
