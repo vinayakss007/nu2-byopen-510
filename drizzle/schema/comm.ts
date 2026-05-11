@@ -121,7 +121,7 @@ export const emailTemplates = pgTable('email_templates', {
 
 // Renamed: Was conflicting with automation.aiEmailDrafts
 // This table tracks AI-generated email drafts for communications
-export const emailDrafts = pgTable('ai_email_drafts', {
+export const emailDrafts = pgTable('comm_email_drafts', {
   id: utils.pk(),
   tenantId: utils.tenantId(),
   contactId: uuid('contact_id').references(() => contacts.id, { onDelete: 'cascade' }),

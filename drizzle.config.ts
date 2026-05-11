@@ -5,6 +5,6 @@ export default {
   out: './drizzle/migrations',
   dialect: 'postgresql',
   dbCredentials: {
-    url: process.env.DATABASE_URL || "postgresql://postgres:nucrm_pass_2026@localhost:5432/nucrm",
+    url: process.env.DATABASE_URL || "postgresql://postgres:13d46e6a411e83f9d60730a7f31aae6e@localhost:5432/nucrm",
   },
 } satisfies Config;
