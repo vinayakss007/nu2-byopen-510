@@ -386,7 +386,7 @@ export const deadLetterQueue = pgTable('dead_letter_queue', {
   resolvedAt: timestamp('resolved_at', { withTimezone: true }),
   resolvedBy: uuid('resolved_by').references(() => users.id),
   resolution: text('resolution'),
-  
+
   ...utils.lifecycle(),
 }, (table) => {
   return {
@@ -394,5 +394,32 @@ export const deadLetterQueue = pgTable('dead_letter_queue', {
     statusIdx: index('idx_dead_letter_status').on(table.status, table.tenantId),
     jobTypeIdx: index('idx_dead_letter_job_type').on(table.jobType),
     createdIdx: index('idx_dead_letter_created').on(table.createdAt),
+  };
+});
+
+// ── Scheduled Reports ─────────────────────────────────────
+export const scheduledReports = pgTable('scheduled_reports', {
+  id: utils.pk(),
+  tenantId: utils.tenantId(),
+
+  name: text('name').notNull(),
+  type: text('type').notNull(), // 'pipeline', 'revenue', 'contacts', 'performance'
+  frequency: text('frequency').notNull(), // 'hourly', 'daily', 'weekly', 'monthly'
+
+  recipients: jsonb('recipients').default([]), // email array
+  config: jsonb('config').default({}), // filters, grouping, etc.
+
+  format: text('format').default('pdf'), // 'pdf', 'csv', 'xlsx'
+  lastRunAt: timestamp('last_run_at', { withTimezone: true }),
+  nextRunAt: timestamp('next_run_at', { withTimezone: true }),
+
+  status: text('status').notNull().default('active'), // 'active', 'paused', 'error'
+
+  ...utils.audit(),
+}, (table) => {
+  return {
+    tenantIdx: utils.tenantIdx(table),
+    statusIdx: index('idx_scheduled_reports_status').on(table.status, table.tenantId),
+    nextRunIdx: index('idx_scheduled_reports_next_run').on(table.nextRunAt),
   };
 });
