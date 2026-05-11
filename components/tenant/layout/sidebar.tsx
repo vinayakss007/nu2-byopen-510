@@ -17,9 +17,6 @@ const CRM_NAV = [
   { href:'/tenant/companies',     label:'Companies',    icon:Building2 },
   { href:'/tenant/deals',         label:'Deals',        icon:TrendingUp },
   { href:'/tenant/services',      label:'Services',     icon:Package },
-  { href:'/tenant/orders',        label:'Orders',       icon:ShoppingCart },
-  { href:'/tenant/contracts',      label:'Contracts',    icon:FileSignature },
-  { href:'/tenant/subscriptions', label:'Subscriptions',icon:RefreshCw },
   { href:'/tenant/tasks',         label:'Tasks',        icon:CheckSquare },
   { href:'/tenant/tickets',       label:'Helpdesk',     icon:LifeBuoy },
   { href:'/tenant/calendar',      label:'Calendar',     icon:Calendar },
@@ -32,6 +29,15 @@ const CRM_NAV = [
   { href:'/tenant/trash',         label:'Trash',        icon:Trash2 },
   { href:'/docs',                 label:'Documentation', icon:Book, perm:'docs.view' },
 ];
+
+const SALES_NAV = [
+  { href:'/tenant/invoices',    label:'Invoices',     icon:FileText },
+  { href:'/tenant/orders',      label:'Orders',       icon:ShoppingCart },
+  { href:'/tenant/contracts',   label:'Contracts',    icon:FileSignature },
+  { href:'/tenant/quotes',      label:'Quotes',       icon:FileText },
+  { href:'/tenant/subscriptions',label:'Subscriptions',icon:RefreshCw },
+];
+
 const SETTINGS_NAV = [
   { href:'/tenant/settings/general',       label:'General' },
   { href:'/tenant/settings/team',          label:'Team' },
@@ -76,7 +82,7 @@ export default function TenantSidebar({ tenant, profile, roleSlug, permissions, 
         <button onClick={onToggle} className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-accent text-muted-foreground transition-colors mb-2">
           <Menu className="w-4 h-4" />
         </button>
-        {CRM_NAV.filter(n=>hasPerm(n.perm)).slice(0,8).map(({href,icon:Icon,label,exact})=>{
+        {[...CRM_NAV.filter(n=>hasPerm(n.perm)), ...SALES_NAV].slice(0,10).map(({href,icon:Icon,label,exact})=>{
           const active = isActive(href, exact);
           return (
             <Link key={href} href={href} title={label}
@@ -127,6 +133,22 @@ export default function TenantSidebar({ tenant, profile, roleSlug, permissions, 
             </Link>
           );
         })}
+
+        {/* Sales Section */}
+        <div className="pt-3">
+          <p className="px-3 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1">Sales</p>
+          {SALES_NAV.map(({ href, label, icon: Icon }) => {
+            const active = isActive(href);
+            return (
+              <Link key={href} href={href}
+                className={cn('tenant-nav-item',
+                  active ? 'active' : '')}>
+                <Icon className={cn('w-4 h-4 shrink-0', active && 'text-violet-600 dark:text-violet-400')} />
+                {label}
+              </Link>
+            );
+          })}
+        </div>
 
         {/* Settings accordion */}
         <div className="pt-2">
