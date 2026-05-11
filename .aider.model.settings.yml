@@ -1,0 +1,4 @@
+- name: openai/dialagram/qwen-3.5-plus
+  edit_format: diff
+  weak_model_name: openai/dialagram/qwen-3.5-plus
+  use_repo_map: true

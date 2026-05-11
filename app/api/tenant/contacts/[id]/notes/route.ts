@@ -1,0 +1,117 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { requireAuth, requirePerm } from '@/lib/auth/middleware';
+import { db } from '@/drizzle/db';
+import { activities, users, contacts } from '@/drizzle/schema';
+import { eq, and, desc, sql } from 'drizzle-orm';
+import { processMentions } from '@/lib/notifications';
+
+export async function GET(
+  request: NextRequest, 
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const ctx = await requireAuth(request);
+    if (ctx instanceof NextResponse) return ctx;
+    
+    const { id } = await params;
+
+    const data = await db.select({
+      id: activities.id,
+      tenantId: activities.tenantId,
+      userId: activities.userId,
+      contactId: activities.contactId,
+      type: activities.type,
+      description: activities.description,
+      metadata: activities.metadata,
+      createdAt: activities.createdAt,
+      full_name: users.fullName,
+      avatar_url: users.avatarUrl
+    })
+    .from(activities)
+    .leftJoin(users, eq(users.id, activities.userId))
+    .where(and(eq(activities.contactId, id), eq(activities.tenantId, ctx.tenantId)))
+    .orderBy(desc(activities.createdAt))
+    .limit(50);
+
+    return NextResponse.json({ data });
+  } catch (err: any) { 
+    return NextResponse.json({ error: err.message }, { status: 500 }); 
+  }
+}
+
+export async function POST(
+  request: NextRequest, 
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const ctx = await requireAuth(request);
+    if (ctx instanceof NextResponse) return ctx;
+    
+    const { id } = await params;
+    const { type = 'note', description, metadata } = await request.json();
+    
+    if (!description?.trim()) {
+      return NextResponse.json({ error: 'description required' }, { status: 400 });
+    }
+    
+    const VALID = ['note', 'call', 'email', 'meeting', 'task', 'deal_update'];
+    if (!VALID.includes(type)) {
+      return NextResponse.json({ error: `type must be one of: ${VALID.join(', ')}` }, { status: 400 });
+    }
+
+    const [row] = await db.insert(activities)
+      .values({
+        tenantId: ctx.tenantId,
+        userId: ctx.userId,
+        contactId: id,
+        type,
+        description: description.trim(),
+        metadata: metadata || {},
+      })
+      .returning();
+
+    // Update contact last activity
+    await db.update(contacts)
+      .set({ updatedAt: new Date() })
+      .where(and(eq(contacts.id, id), eq(contacts.tenantId, ctx.tenantId)));
+
+    // Process mentions for notifications
+    await processMentions(description.trim(), ctx.tenantId, ctx.userId, `/tenant/contacts/${id}`);
+
+    return NextResponse.json({ data: row }, { status: 201 });
+  } catch (err: any) { 
+    return NextResponse.json({ error: err.message }, { status: 500 }); 
+  }
+}
+
+export async function DELETE(
+  request: NextRequest, 
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const ctx = await requireAuth(request);
+    if (ctx instanceof NextResponse) return ctx;
+    
+    const deny = requirePerm(ctx, 'contacts.edit');
+    if (deny) return deny;
+
+    const { id } = await params;
+    const { noteId } = await request.json();
+
+    if (!noteId) {
+      return NextResponse.json({ error: 'noteId required' }, { status: 400 });
+    }
+
+    await db.delete(activities)
+      .where(and(
+        eq(activities.id, noteId),
+        eq(activities.userId, ctx.userId),
+        eq(activities.contactId, id),
+        eq(activities.tenantId, ctx.tenantId)
+      ));
+
+    return NextResponse.json({ ok: true });
+  } catch (err: any) { 
+    return NextResponse.json({ error: err.message }, { status: 500 }); 
+  }
+}

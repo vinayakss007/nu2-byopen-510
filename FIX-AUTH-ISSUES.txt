@@ -1,0 +1,177 @@
+================================================================================
+                    NUCRM - INDUSTRY GRADE CRM FIXES
+================================================================================
+
+LATEST UPDATE: Added Services, Invoices, Orders, Contracts, Subscriptions
+
+================================================================================
+FIX AUTH (LOGIN/SIGNUP) - RUN FIRST:
+================================================================================
+
+OPTION 1: Run Drizzle Fix Script
+----------------------------------
+npx tsx scripts/fix-drizzle-only.ts
+
+OPTION 2: Push Drizzle Schema
+------------------------------
+npm run db:push
+
+
+================================================================================
+NEW MODULES ADDED (Industry Grade):
+================================================================================
+
+1. SERVICES MODULE
+   - Create/edit/delete services
+   - Pricing types: fixed, hourly, monthly, yearly
+   - Categories, duration, tax rates
+   - Frontend: /tenant/services
+   - API: /api/tenant/services
+
+2. INVOICES MODULE  
+   - Create invoices with line items
+   - Status: draft, sent, viewed, partial, paid, overdue, cancelled
+   - Discount types (percentage/fixed)
+   - Tax calculations
+   - Frontend: /tenant/invoices
+   - API: /api/tenant/invoices
+
+3. ORDERS MODULE
+   - Create orders with line items
+   - Status: draft, confirmed, processing, shipped, delivered, cancelled
+   - Shipping tracking
+   - Frontend: /tenant/orders
+   - API: /api/tenant/orders
+
+4. CONTRACTS MODULE
+   - Create contracts/agreements
+   - Types: service, sales, NDA, partnership
+   - Status tracking with dates
+   - Frontend: /tenant/contracts
+   - API: /api/tenant/contracts
+
+5. SUBSCRIPTIONS MODULE
+   - Recurring subscriptions
+   - MRR/ARR tracking
+   - Auto-renewal settings
+   - Frontend: /tenant/subscriptions
+   - API: /api/tenant/subscriptions
+
+================================================================================
+FILES CREATED:
+================================================================================
+
+SCHEMA:
+- drizzle/schema/billing.ts (services, invoices, orders, contracts, subscriptions)
+
+API ROUTES:
+- app/api/tenant/services/route.ts
+- app/api/tenant/invoices/route.ts
+- app/api/tenant/orders/route.ts
+- app/api/tenant/contracts/route.ts
+- app/api/tenant/subscriptions/route.ts
+
+FRONTEND PAGES:
+- app/tenant/services/page.tsx
+- app/tenant/invoices/page.tsx
+- app/tenant/orders/page.tsx
+- app/tenant/contracts/page.tsx
+- app/tenant/subscriptions/page.tsx
+
+AUTH FIX:
+- lib/auth/api-handlers.ts (platform settings check)
+- scripts/fix-drizzle-only.ts
+- scripts/fix-drizzle-schema.sql
+
+================================================================================
+BACKUP & RESTORE (Already exists):
+================================================================================
+- tenant_backups, tenant_restores tables
+- tenant_backup_records, tenant_restore_records
+- backup_schedules, backup_alerts
+- selective_restore_* tables
+- API: /api/tenant/backup/*, /api/superadmin/restore/*
+
+================================================================================
+NEXT STEPS:
+================================================================================
+1. Run auth fix: npx tsx scripts/fix-drizzle-only.ts
+2. Run migrations: npm run db:push
+3. Restart app: npm run dev
+4. Test login/signup
+5. Access new modules via sidebar navigation
+
+================================================================================
+
+PROBLEM SUMMARY:
+----------------
+After migrating from raw SQL to Drizzle ORM, login and signup are broken.
+
+ROOT CAUSES:
+------------
+1. DATABASE SCHEMA MISMATCH
+   - Drizzle schema has columns that don't exist in the database
+   - Missing columns in users table: locale, theme, telegram_*, deleted_by
+   - Missing tables: platform_settings, email_verifications
+   - Missing columns in pipelines, roles, tenant_members, tenants
+
+2. PLATFORM SETTINGS NOT CONFIGURED
+   - No allow_signups setting in database
+   - No require_email_verify setting
+   - No platform_name setting
+
+================================================================================
+
+FIX USING DRIZZLE (Recommended):
+-------------------------------
+
+OPTION 1: Run Drizzle Fix Script
+----------------------------------
+npx tsx scripts/fix-drizzle-only.ts
+
+This script uses Drizzle ORM to:
+- Add missing columns to users, sessions, tenants, pipelines, roles, tenant_members
+- Create platform_settings and email_verifications tables
+- Insert default platform settings
+- Create required indexes
+
+
+OPTION 2: Push Drizzle Schema
+------------------------------
+npm run db:push
+# or
+npm run db:migrate
+
+This pushes Drizzle schema changes to database.
+
+
+OPTION 3: Manual SQL Fix
+-------------------------
+psql -U postgres -d nucrm -f scripts/fix-drizzle-schema.sql
+
+
+================================================================================
+VERIFICATION:
+================================================================================
+After running the fix:
+
+Test login:
+curl -X POST http://localhost:3000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"your@email.com","password":"YourPassword123!"}'
+
+Test signup:
+curl -X POST http://localhost:3000/api/auth/signup \
+  -H "Content-Type: application/json" \
+  -d '{"email":"new@email.com","password":"NewPassword123!A","full_name":"Your Name","workspace_name":"Company"}'
+
+
+================================================================================
+FILES CREATED/FIXED:
+================================================================================
+1. lib/auth/api-handlers.ts - Added platform settings check with safety wrapper
+2. scripts/fix-drizzle-only.ts - Drizzle fix script (use this!)
+3. scripts/fix-drizzle-schema.sql - SQL fix script (alternative)
+4. FIX-AUTH-ISSUES.txt - This file
+
+================================================================================

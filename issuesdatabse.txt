@@ -1,0 +1,22 @@
+✦ Now I can see all the mismatches. Let me fix them all at once:
+
+     - workflows: is_published not is_active, needs trigger_config, nodes
+     - automations: needs actions (jsonb array)
+     - integrations: type not integration_type, needs name, user_id
+     - api_keys: user_id not created_by, scopes not permissions, needs key_prefix
+     - usage_alerts: completely different schema - target_type, target_id, threshold_value, message, notification_sent
+
+
+      ═══════════════════════════════════════════════                                                                                       │
+  │      NuCRM — Backup/Restore Test Data Seeder                                                                                             │
+  │    ═══════════════════════════════════════════════                                                                                       │
+  │                                                                                                                                          │
+  │    📦 Creating super admin...                                                                                                            │
+  │      ✅ admin@nucrm.com (81ce3dc0...)                                                                                                    │
+  │                                                                                                                                          │
+  │    📦 Creating plans...                                                                                                                  │
+  │      ✅ 6 plans                                                                                                                          │
+  │                                                                                                                                          │
+  │    📦 Creating modules...                                                                                                                │
+  │      ✅ 6 modules                                                                                                                        │
+  │                                     
