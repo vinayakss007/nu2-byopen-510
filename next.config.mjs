@@ -5,32 +5,67 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 /** @type {import('next').NextConfig} */
 let nextConfig = {
+  // Turbopack for faster dev
   turbopack: {
     root: __dirname,
   },
 
+  // TypeScript
   typescript: {
     ignoreBuildErrors: true,
   },
 
+  // Build indicators
   devIndicators: {
     buildActivity: false,
   },
 
+  // Image optimization
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: '**' },
       { protocol: 'http', hostname: '**' },
     ],
-    unoptimized: true,
+    formats: ['image/avif', 'image/webp'],
+    minimumCacheTTL: 60,
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },
 
+  // Compression
+  compress: true,
+
+  // Production optimizations
+  productionBrowserSourceMaps: false,
+
+  // Server external packages
   serverExternalPackages: ['pg', 'nodemailer'],
 
+  // Transpile packages
   transpilePackages: ['@xyflow/react'],
 
+  // Experimental features
+  experimental: {
+    optimizeCss: true,
+    optimizePackageImports: ['lucide-react', '@radix-ui/react-*', '@dnd-kit/core', '@dnd-kit/sortable'],
+  },
+
+  // Headers for caching
   async headers() {
-    return [];
+    return [
+      {
+        source: '/api/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=60, stale-while-revalidate=300' },
+        ],
+      },
+      {
+        source: '/_next/static/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+        ],
+      },
+    ];
   },
 };
 
