@@ -1,0 +1,104 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:16-alpine
+    container_name: nucrm-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: nucrm
+      POSTGRES_PASSWORD: nucrm_secure_password
+      POSTGRES_DB: nucrm
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backups:/backups
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nucrm"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: nucrm-redis
+    restart: unless-stopped
+    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # NuCRM App
+  app:
+    build: .
+    container_name: nucrm-app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://nucrm:nucrm_secure_password@db:5432/nucrm
+      REDIS_URL: redis://redis:6379
+      NODE_ENV: production
+      JWT_SECRET: ${JWT_SECRET:-change-this-in-production}
+      SESSION_SECRET: ${SESSION_SECRET:-change-this-in-production}
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./uploads:/app/uploads
+
+  # Cron Job for Backups
+  backup:
+    build: .
+    container_name: nucrm-backup
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://nucrm:nucrm_secure_password@db:5432/nucrm
+      S3_ENDPOINT: ${S3_ENDPOINT}
+      S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID}
+      S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY}
+      S3_BUCKET: ${S3_BUCKET:-nucrm-backups}
+    volumes:
+      - ./scripts:/app/scripts
+      - ./backups:/backups
+    command: ["npx", "tsx", "scripts/backup-db.ts"]
+    restart: "no"
+
+  # Worker for Background Jobs
+  worker:
+    build: .
+    container_name: nucrm-worker
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://nucrm:nucrm_secure_password@db:5432/nucrm
+      REDIS_URL: redis://redis:6379
+      NODE_ENV: production
+    command: ["npm", "run", "worker"]
+    volumes:
+      - ./uploads:/app/uploads
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  default:
+    name: nucrm-network
