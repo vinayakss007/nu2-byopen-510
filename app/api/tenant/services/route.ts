@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
     const { tenantId, userId } = ctx;
 
     const body = await request.json();
-    const { name, description, category, pricingType, unitPrice, hourlyRate, monthlyPrice, yearlyPrice, taxRate, taxable, currency, durationMinutes, durationHours, imageUrl, tags } = body;
+    const { name, description, category, pricingType, unitPrice, hourlyRate, monthlyPrice, yearlyPrice, taxRate, taxable, currency, durationMinutes, durationHours, imageUrl, tags, contactId, companyId } = body;
 
     if (!name) {
       return NextResponse.json({ error: 'Service name is required' }, { status: 400 });
@@ -63,6 +63,8 @@ export async function POST(request: NextRequest) {
 
     const [service] = await db.insert(services).values({
       tenantId,
+      contactId: contactId || null,
+      companyId: companyId || null,
       name,
       description,
       category,
@@ -74,8 +76,8 @@ export async function POST(request: NextRequest) {
       taxRate: taxRate ? String(taxRate) : '0',
       taxable: taxable ?? true,
       currency: currency || 'USD',
-      durationMinutes,
-      durationHours,
+      durationMinutes: durationMinutes ? Number(durationMinutes) : null,
+      durationHours: durationHours ? Number(durationHours) : null,
       imageUrl,
       tags: tags || [],
       createdBy: userId,

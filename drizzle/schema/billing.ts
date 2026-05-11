@@ -13,6 +13,9 @@ export const services = pgTable('services', {
   id: utils.pk(),
   tenantId: utils.tenantId(),
   
+  contactId: uuid('contact_id').references(() => contacts.id, { onDelete: 'set null' }),
+  companyId: uuid('company_id').references(() => companies.id, { onDelete: 'set null' }),
+  
   name: text('name').notNull(),
   description: text('description'),
   category: text('category'),
@@ -46,6 +49,8 @@ export const services = pgTable('services', {
   tenantIdx: utils.tenantIdx(table),
   nameIdx: index('idx_services_name').on(table.name),
   categoryIdx: index('idx_services_category').on(table.category),
+  contactIdx: index('idx_services_contact').on(table.contactId),
+  companyIdx: index('idx_services_company').on(table.companyId),
   activeIdx: utils.activeIdx(table),
 }));
 
@@ -68,8 +73,8 @@ export const invoices = pgTable('invoices', {
   id: utils.pk(),
   tenantId: utils.tenantId(),
   
-  contactId: uuid('contact_id'),
-  companyId: uuid('company_id'),
+  contactId: uuid('contact_id').references(() => contacts.id, { onDelete: 'set null' }),
+  companyId: uuid('company_id').references(() => companies.id, { onDelete: 'set null' }),
   
   invoiceNumber: text('invoice_number').notNull(),
   title: text('title'),
@@ -163,8 +168,8 @@ export const orders = pgTable('orders', {
   id: utils.pk(),
   tenantId: utils.tenantId(),
   
-  contactId: uuid('contact_id'),
-  companyId: uuid('company_id'),
+  contactId: uuid('contact_id').references(() => contacts.id, { onDelete: 'set null' }),
+  companyId: uuid('company_id').references(() => companies.id, { onDelete: 'set null' }),
   
   orderNumber: text('order_number').notNull(),
   title: text('title'),
@@ -234,8 +239,8 @@ export const contracts = pgTable('contracts', {
   id: utils.pk(),
   tenantId: utils.tenantId(),
   
-  contactId: uuid('contact_id'),
-  companyId: uuid('company_id'),
+  contactId: uuid('contact_id').references(() => contacts.id, { onDelete: 'set null' }),
+  companyId: uuid('company_id').references(() => companies.id, { onDelete: 'set null' }),
   
   title: text('title').notNull(),
   contractNumber: text('contract_number'),
