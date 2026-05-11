@@ -1,31 +1,14 @@
 'use client';
+import { loginAction } from './actions';
+
 export default function LoginPage() {
-  async function login(formData: FormData) {
-    const email = formData.get('email');
-    const password = formData.get('password');
-    
-    const res = await fetch('/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password })
-    });
-    
-    const data = await res.json();
-    
-    if (data.ok) {
-      window.location.href = '/tenant/dashboard';
-    } else {
-      alert(data.error || 'Login failed');
-    }
-  }
-  
   return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8f9fa' }}>
       <div style={{ width: 360, padding: 40, background: 'white', borderRadius: 12, boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
         <h1 style={{ margin: '0 0 8px', fontSize: 28, fontWeight: 700, color: '#1a1a2e', textAlign: 'center' }}>NuCRM</h1>
         <p style={{ margin: '0 0 32px', color: '#6b7280', textAlign: 'center' }}>Sign in to your workspace</p>
         
-        <form action={login} method="POST">
+        <form action={loginAction}>
           <div style={{ marginBottom: 20 }}>
             <label style={{ display: 'block', marginBottom: 8, fontSize: 14, fontWeight: 500, color: '#374151' }}>Email</label>
             <input 
