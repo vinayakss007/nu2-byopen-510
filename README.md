@@ -211,6 +211,48 @@ nucrm-saas/
 
 ## Deployment
 
+### VM Deployment (Google Cloud)
+
+**Option 1: Auto Deploy (Recommended)**
+```bash
+# SSH into VM and run:
+curl -sL https://raw.githubusercontent.com/vinayakss007/nu2-byopen-510/main/scripts/deploy-vm.sh -o /tmp/deploy.sh
+chmod +x /tmp/deploy.sh && bash /tmp/deploy.sh
+```
+
+**Option 2: Manual**
+```bash
+# 1. Install prerequisites
+sudo apt update && sudo apt install -y nodejs postgresql git
+
+# 2. Start PostgreSQL
+sudo systemctl start postgresql
+sudo -u postgres createdb nucrm_db
+
+# 3. Clone and setup
+git clone https://github.com/vinayakss007/nu2-byopen-510.git
+cd nu2-byopen-510
+
+# 4. Create .env.local
+cat > .env.local << EOF
+DATABASE_URL=postgresql://postgres:YOUR_PASSWORD@localhost:5432/nucrm_db
+JWT_SECRET=$(node -e "console.log(require('crypto').randomBytes(32).toString('hex'))")
+SETUP_KEY=admin-setup-key-2026
+EOF
+
+# 5. Install and run
+npm install
+npm run db:push
+npm run dev
+```
+
+### Cloud Run Deployment
+```bash
+# Run the deploy script
+curl -sL https://raw.githubusercontent.com/vinayakss007/nu2-byopen-510/main/scripts/deploy-cloudrun.sh -o /tmp/deploy.sh
+chmod +x /tmp/deploy.sh && bash /tmp/deploy.sh
+```
+
 See [DEPLOYMENT.md](./DEPLOYMENT.md) for full guides covering:
 - Railway (recommended)
 - Render
