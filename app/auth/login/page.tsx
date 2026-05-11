@@ -13,6 +13,7 @@ export default function LoginPage() {
   const router = useRouter();
 
   const handleLogin = async () => {
+    console.log('[Login] Starting...', { email: email.slice(0,3) });
     setError('');
     if (!email || !password) {
       setError('Please enter email and password');
@@ -22,12 +23,15 @@ export default function LoginPage() {
     setLoading(true);
     
     try {
+      console.log('[Login] Calling API...');
       const res = await fetch('/api/auth/login', {
         method:'POST', 
         headers:{'Content-Type':'application/json'},
         body: JSON.stringify({ email, password }),
       });
+      console.log('[Login] Response:', res.status);
       const data = await res.json();
+      console.log('[Login] Data:', data);
       
       if (!res.ok) {
         setError(data.error || 'Login failed');
@@ -35,9 +39,10 @@ export default function LoginPage() {
         return;
       }
       
-      // Direct page redirect
+      console.log('[Login] Success, redirecting...');
       window.location.href = '/tenant/dashboard';
     } catch (err) {
+      console.log('[Login] Error:', err);
       setError('Connection error');
       setLoading(false);
     }
