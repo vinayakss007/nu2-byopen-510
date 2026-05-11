@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Zap, Eye, EyeOff, Loader2 } from 'lucide-react';
+import toast, { Toaster } from 'react-hot-toast';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -13,7 +14,11 @@ export default function LoginPage() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    alert('Form submitted! Email: ' + email);
+    if (!email || !password) {
+      toast.error('Please enter email and password');
+      return;
+    }
+    
     setLoading(true);
     
     try {
@@ -24,23 +29,24 @@ export default function LoginPage() {
       });
       const data = await res.json();
       
-      alert('Response: ' + JSON.stringify(data));
-      
       if (!res.ok) {
-        alert('Error: ' + data.error);
+        toast.error(data.error || 'Login failed');
         setLoading(false);
         return;
       }
       
-      alert('Login OK! Redirecting...');
+      toast.success('Signed in! Redirecting...');
       router.push('/tenant/dashboard');
+      router.refresh();
     } catch (err) {
-      alert('Error: ' + err);
+      toast.error('Connection error - please try again');
       setLoading(false);
     }
   };
 
   return (
+    <>
+    <Toaster position="bottom-right" />
     <div className="min-h-screen bg-gradient-to-br from-violet-50 via-white to-indigo-50 dark:from-slate-950 dark:via-slate-900 dark:to-violet-950 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
@@ -54,7 +60,7 @@ export default function LoginPage() {
         </div>
 
         <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-800 p-8">
-          <div className="space-y-4">
+          <form onSubmit={handleLogin} className="space-y-4">
             <div>
               <label className="block text-sm font-medium mb-1.5">Email</label>
               <input 
@@ -81,7 +87,7 @@ export default function LoginPage() {
                   className="w-full px-3.5 py-2.5 rounded-xl border border-border bg-background text-sm font-medium focus:outline-none focus:ring-2 focus:ring-violet-500 pr-10" 
                 />
                 <button 
-                  type="button" 
+                  type="button"
                   onClick={()=>setShowPass(s=>!s)} 
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
                 >
@@ -90,8 +96,8 @@ export default function LoginPage() {
               </div>
             </div>
             <button 
-              type="button"
-              onClick={handleLogin}
+              type="submit"
+              disabled={loading}
               className="w-full py-2.5 bg-gradient-to-r from-violet-600 to-indigo-600 text-white rounded-xl text-sm font-semibold hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {loading ? <Loader2 className="w-4 h-4 animate-spin"/> : null}
@@ -100,9 +106,10 @@ export default function LoginPage() {
             <p className="text-center text-sm text-muted-foreground">
               No account? <Link href="/auth/signup" className="text-violet-600 font-medium hover:underline">Create workspace</Link>
             </p>
-          </div>
+          </form>
         </div>
       </div>
     </div>
+    </>
   );
 }
