@@ -1,62 +1,82 @@
 'use client';
 import { useState } from 'react';
+import { useEffect } from 'react';
 
 export default function LoginPage() {
+  const [msg, setMsg] = useState('');
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-
-  async function handleClick() {
-    setLoading(true);
-    console.log('Clicked, calling API...');
-    
-    const response = await fetch('/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password })
-    });
-    
-    const data = await response.json();
-    console.log('Response:', response.status, data);
-    
-    if (data.ok) {
-      console.log('Success! Going to dashboard');
-      window.location.href = '/tenant/dashboard';
-    } else {
-      console.log('Error:', data.error);
-      alert(data.error || 'Login failed');
-      setLoading(false);
-    }
-  }
+  const [pwd, setPwd] = useState('');
+  const [btnDisabled, setBtnDisabled] = useState(false);
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ width: 300 }}>
-        <h1 style={{ marginBottom: 20 }}>NuCRM Login</h1>
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f5f5f5' }}>
+      <div style={{ width: 320, padding: 30, background: 'white', borderRadius: 8, boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
+        <h2 style={{ marginBottom: 20, textAlign: 'center', color: '#333' }}>NuCRM Login</h2>
         
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          style={{ width: '100%', padding: 10, marginBottom: 10 }}
-        />
+        {msg && (
+          <div style={{ padding: 10, marginBottom: 15, background: msg.includes('Success') ? '#d4edda' : '#f8d7da', color: msg.includes('Success') ? '#155724' : '#721c24', borderRadius: 4, fontSize: 14 }}>
+            {msg}
+          </div>
+        )}
         
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          style={{ width: '100%', padding: 10, marginBottom: 10 }}
-        />
-        
-        <button
-          onClick={handleClick}
-          disabled={loading}
-          style={{ width: '100%', padding: 10, backgroundColor: '#7c3aed', color: 'white', border: 'none', cursor: 'pointer' }}
+        <form 
+          action="/api/auth/login" 
+          method="POST"
+          encType="application/json"
+          onSubmit={(e) => {
+            e.preventDefault();
+            setBtnDisabled(true);
+            setMsg('Signing in...');
+            
+            fetch('/api/auth/login', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email, password: pwd })
+            })
+            .then(r => r.json())
+            .then(d => {
+              if (d.ok) {
+                setMsg('Success! Redirecting...');
+                window.location.href = '/tenant/dashboard';
+              } else {
+                setMsg(d.error || 'Login failed');
+                setBtnDisabled(false);
+              }
+            })
+            .catch(err => {
+              setMsg('Error: ' + err.message);
+              setBtnDisabled(false);
+            });
+          }}
         >
-          {loading ? 'Loading...' : 'Sign In'}
-        </button>
+          <input 
+            name="email"
+            type="email"
+            placeholder="Email address"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            required
+            style={{ width: '100%', padding: '12px', marginBottom: 12, border: '1px solid #ddd', borderRadius: 4, fontSize: 14, boxSizing: 'border-box' }}
+          />
+          
+          <input 
+            name="password"
+            type="password"
+            placeholder="Password"
+            value={pwd}
+            onChange={e => setPwd(e.target.value)}
+            required
+            style={{ width: '100%', padding: '12px', marginBottom: 20, border: '1px solid #ddd', borderRadius: 4, fontSize: 14, boxSizing: 'border-box' }}
+          />
+          
+          <button 
+            type="submit"
+            disabled={btnDisabled}
+            style={{ width: '100%', padding: '12px', background: btnDisabled ? '#ccc' : '#7c3aed', color: 'white', border: 'none', borderRadius: 4, fontSize: 14, cursor: btnDisabled ? 'not-allowed' : 'pointer' }}
+          >
+            {btnDisabled ? 'Signing in...' : 'Sign In'}
+          </button>
+        </form>
       </div>
     </div>
   );
