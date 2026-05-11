@@ -37,7 +37,6 @@ export default function LoginPage() {
       
       toast.success('Signed in! Redirecting...');
       router.push('/tenant/dashboard');
-      router.refresh();
     } catch (err) {
       toast.error('Connection error - please try again');
       setLoading(false);
