@@ -5,6 +5,9 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 /** @type {import('next').NextConfig} */
 let nextConfig = {
+  // Standalone output for production Docker builds
+  output: process.env.NODE_ENV === 'production' ? 'standalone' : undefined,
+
   // Turbopack for faster dev
   turbopack: {
     root: __dirname,
