@@ -12,7 +12,8 @@ export async function GET(request: NextRequest) {
 
     const reports = await db.select().from(scheduledReports)
       .where(eq(scheduledReports.tenantId, ctx.tenantId))
-      .orderBy(desc(scheduledReports.createdAt));
+      .orderBy(desc(scheduledReports.createdAt))
+      .limit(100);
 
     return NextResponse.json({ data: reports });
   } catch (error) {

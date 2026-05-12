@@ -56,7 +56,7 @@ export async function GET(
     });
   } catch (error: any) {
     console.error('[API Keys] GET error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }
 
@@ -84,7 +84,7 @@ export async function DELETE(
     return NextResponse.json({ ok: true, message: 'API key revoked' });
   } catch (error: any) {
     console.error('[API Keys] DELETE error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }
 
@@ -135,6 +135,6 @@ export async function POST(
     });
   } catch (error: any) {
     console.error('[API Keys] ROTATE error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }

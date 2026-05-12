@@ -23,6 +23,6 @@ export async function GET(request: NextRequest) {
     const isCurrent = existing?.id === ctx.tenantId;
     return NextResponse.json({ available: !existing || isCurrent, current: isCurrent });
   } catch (err:any) { 
-    return NextResponse.json({ error:err.message }, { status:500 }); 
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status:500 }); 
   }
 }

@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
   } catch (err: any) {
     console.error('[TestEmail] Error:', err.message);
     return NextResponse.json({ 
-      error: err.message,
+      error: 'An unexpected error occurred',
       stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,
     }, { status: 500 });
   }

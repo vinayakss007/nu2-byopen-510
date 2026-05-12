@@ -69,6 +69,6 @@ export async function POST(req: NextRequest) {
 
   } catch (err: any) {
     console.error('[IndustrySetup] error:', err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }

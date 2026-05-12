@@ -92,7 +92,8 @@ export async function GET(req: NextRequest) {
     }));
 
     return NextResponse.json({ data: withExpiry, total: withExpiry.length });
-  } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
+  } catch (err: any) { console.error('[API]', err);
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 }); }
 }
 
 export async function PATCH(req: NextRequest) {
@@ -124,7 +125,8 @@ export async function PATCH(req: NextRequest) {
 
     await logAudit({ tenantId: ctx.tenantId, userId: ctx.userId, action:`restore`, resourceType: resource_type, resourceId: id });
     return NextResponse.json({ ok: true, message: `${resource_type} restored successfully` });
-  } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
+  } catch (err: any) { console.error('[API]', err);
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 }); }
 }
 
 export async function DELETE(req: NextRequest) {
@@ -156,5 +158,6 @@ export async function DELETE(req: NextRequest) {
     
     await logAudit({ tenantId: ctx.tenantId, userId: ctx.userId, action:'permanent_delete', resourceType: resource_type, resourceId: id });
     return NextResponse.json({ ok: true });
-  } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
+  } catch (err: any) { console.error('[API]', err);
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 }); }
 }

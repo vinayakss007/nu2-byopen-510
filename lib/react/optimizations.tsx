@@ -3,16 +3,16 @@
  * Lazy loading and memoization utilities
  */
 
-import { lazy, Suspense, memo, ComponentType } from 'react';
+import { lazy, Suspense, memo } from 'react';
 
 // Lazy load heavy components
-export function lazyLoad<T extends ComponentType<any>>(
-  importFn: () => Promise<{ default: T }>,
+export function lazyLoad<T extends object>(
+  importFn: () => Promise<{ default: React.ComponentType<T> }>,
   fallback?: React.ReactNode
 ) {
   const LazyComponent = lazy(importFn);
   
-  return function LazyWrapper(props: any) {
+  return function LazyWrapper(props: T) {
     return (
       <Suspense fallback={fallback || <LoadingSkeleton />}>
         <LazyComponent {...props} />
@@ -64,48 +64,6 @@ export const OptimizedListItem = memo(function OptimizedListItem({
   );
 });
 
-// Virtual list for large datasets
-export function VirtualList<T>({
-  items,
-  renderItem,
-  itemHeight = 60,
-  containerHeight = 400,
-}: {
-  items: T[];
-  renderItem: (item: T, index: number) => React.ReactNode;
-  itemHeight?: number;
-  containerHeight?: number;
-}) {
-  const [scrollTop, setScrollTop] = React.useState(0);
-  
-  const startIndex = Math.max(0, Math.floor(scrollTop / itemHeight) - 5);
-  const endIndex = Math.min(
-    items.length,
-    Math.ceil((scrollTop + containerHeight) / itemHeight) + 5
-  );
-  
-  const visibleItems = items.slice(startIndex, endIndex);
-  
-  return (
-    <div
-      style={{ height: containerHeight, overflow: 'auto' }}
-      onScroll={(e) => setScrollTop(e.currentTarget.scrollTop)}
-    >
-      <div style={{ height: items.length * itemHeight, position: 'relative' }}>
-        <div
-          style={{
-            position: 'absolute',
-            top: startIndex * itemHeight,
-            width: '100%',
-          }}
-        >
-          {visibleItems.map((item, i) => renderItem(item, startIndex + i))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
 // Debounce hook
 export function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = React.useState(value);
@@ -116,12 +74,4 @@ export function useDebounce<T>(value: T, delay: number): T {
   }, [value, delay]);
 
   return debouncedValue;
-}
-
-// Memoized callback
-export function useMemoCallback<T extends (...args: any[]) => any>(
-  callback: T,
-  deps: React.DependencyList
-): T {
-  return React.useCallback(callback, deps) as T;
 }

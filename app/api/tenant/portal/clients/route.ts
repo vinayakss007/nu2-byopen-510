@@ -19,12 +19,13 @@ export async function GET(request: NextRequest) {
       .select()
       .from(portalClients)
       .where(eq(portalClients.tenantId, ctx.tenantId))
-      .orderBy(desc(portalClients.createdAt));
+      .orderBy(desc(portalClients.createdAt))
+      .limit(100);
 
     return NextResponse.json({ data: clients });
   } catch (err: any) {
     console.error('[portal clients GET]', err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to fetch portal clients' }, { status: 500 });
   }
 }
 
@@ -81,7 +82,7 @@ export async function POST(request: NextRequest) {
     });
   } catch (err: any) {
     console.error('[portal clients POST]', err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }
 
@@ -102,6 +103,6 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ ok: true });
   } catch (err: any) {
     console.error('[portal clients DELETE]', err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }

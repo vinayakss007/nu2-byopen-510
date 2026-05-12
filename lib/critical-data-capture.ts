@@ -39,16 +39,19 @@ export class CriticalDataCapture {
 
     let captured = 0;
 
-    for (const recordId of recordIds) {
-      try {
-        // Fetch the full row before deletion using sql.raw for dynamic table name
-        const result = await db.execute(sql`SELECT * FROM ${sql.identifier(tableName)} WHERE id = ${recordId}`);
+    try {
+      // Batch-fetch all records in one query instead of N+1
+      const result = await db.execute(
+        sql`SELECT * FROM ${sql.identifier(tableName)} WHERE id = ANY(${recordIds})`
+      );
 
-        if (result.rows.length === 0) continue;
+      const rows = result.rows as Record<string, any>[];
+      if (rows.length === 0) return 0;
 
-        const rowData = result.rows[0];
+      const backups: any[] = [];
 
-        // Clean non-serializable values
+      for (const rowData of rows) {
+        if (!rowData) continue;
         const cleanData: Record<string, any> = {};
         for (const [key, value] of Object.entries(rowData)) {
           if (typeof value === 'bigint') {
@@ -60,22 +63,23 @@ export class CriticalDataCapture {
           }
         }
 
-        // Save to critical backup table
-        await db.insert(criticalDataBackups)
-          .values({
-            tenantId,
-            tableName,
-            recordId,
-            backupData: cleanData,
-            operation: 'delete',
-            deletedBy: deletedBy || null,
-            retainedUntil: new Date(Date.now() + RETENTION_DAYS * 24 * 60 * 60 * 1000),
-          });
-
-        captured++;
-      } catch (err: any) {
-        console.error(`[CriticalDataCapture] Failed to capture ${tableName}:${recordId}:`, err.message);
+        backups.push({
+          tenantId,
+          tableName,
+          recordId: String(rowData['id'] || ''),
+          backupData: cleanData,
+          operation: 'delete',
+          deletedBy: deletedBy || null,
+          retainedUntil: new Date(Date.now() + RETENTION_DAYS * 24 * 60 * 60 * 1000),
+        });
       }
+
+      if (backups.length > 0) {
+        await db.insert(criticalDataBackups).values(backups);
+        captured = backups.length;
+      }
+    } catch (err: any) {
+      console.error(`[CriticalDataCapture] Failed to capture ${tableName}:`, err.message);
     }
 
     return captured;

@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
   } catch (err: any) {
     console.error('[oauth/revoke POST]', err);
     return NextResponse.json(
-      { error: 'server_error', error_description: err.message },
+      { error: 'server_error', error_description: 'Authentication failed' },
       { status: 500 }
     );
   }

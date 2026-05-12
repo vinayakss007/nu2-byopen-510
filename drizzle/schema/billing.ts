@@ -2,11 +2,8 @@ import { uniqueIndex, pgTable, uuid, text, timestamp, jsonb, decimal, integer, b
 import { sql } from 'drizzle-orm';
 import * as utils from './utils';
 
-// Forward references to avoid circular deps
-const tenants = {} as any;
-const users = {} as any;
-const companies = {} as any;
-const contacts = {} as any;
+import { tenants, users } from './core';
+import { companies, contacts, products, quotes } from './crm';
 
 // ── SERVICES MODULE ─────────────────────────────────────
 export const services = pgTable('services', {
@@ -102,16 +99,16 @@ export const invoices = pgTable('invoices', {
   terms: text('terms'),
   footer: text('footer'),
   
-  quoteId: uuid('quote_id'),
-  orderId: uuid('order_id'),
-  
+  quoteId: uuid('quote_id').references(() => quotes.id, { onDelete: 'set null' }),
+  orderId: uuid('order_id').references(() => orders.id, { onDelete: 'set null' }),
+
   paymentMethod: text('payment_method'),
   paymentReference: text('payment_reference'),
   
   isRecurring: boolean('is_recurring').default(false),
   recurringFrequency: text('recurring_frequency'),
   nextBillingDate: date('next_billing_date'),
-  parentInvoiceId: uuid('parent_invoice_id'),
+  parentInvoiceId: uuid('parent_invoice_id').references(() => invoices.id, { onDelete: 'set null' }),
   
   sentReminder: boolean('sent_reminder').default(false),
   metadata: utils.metadata(),
@@ -129,9 +126,9 @@ export const invoices = pgTable('invoices', {
 
 export const invoiceLineItems = pgTable('invoice_line_items', {
   id: utils.pk(),
-  invoiceId: uuid('invoice_id').notNull(),
-  productId: uuid('product_id'),
-  serviceId: uuid('service_id'),
+  invoiceId: uuid('invoice_id').notNull().references(() => invoices.id, { onDelete: 'cascade' }),
+  productId: uuid('product_id').references(() => products.id, { onDelete: 'set null' }),
+  serviceId: uuid('service_id').references(() => services.id, { onDelete: 'set null' }),
   description: text('description').notNull(),
   itemType: text('item_type').notNull(),
   quantity: decimal('quantity', { precision: 15, scale: 4 }).notNull().default('1'),
@@ -150,13 +147,13 @@ export const invoiceLineItems = pgTable('invoice_line_items', {
 
 export const invoicePayments = pgTable('invoice_payments', {
   id: utils.pk(),
-  invoiceId: uuid('invoice_id').notNull(),
+  invoiceId: uuid('invoice_id').notNull().references(() => invoices.id, { onDelete: 'cascade' }),
   amount: decimal('amount', { precision: 15, scale: 2 }).notNull(),
   paymentDate: date('payment_date').notNull(),
   paymentMethod: text('payment_method'),
   reference: text('reference'),
   notes: text('notes'),
-  recordedBy: uuid('recorded_by'),
+  recordedBy: uuid('recorded_by').references(() => users.id, { onDelete: 'set null' }),
   ...utils.audit(),
 }, (table) => ({
   invoiceIdx: index('idx_invoice_payments_invoice').on(table.invoiceId),
@@ -204,8 +201,8 @@ export const orders = pgTable('orders', {
   notes: text('notes'),
   customerNotes: text('customer_notes'),
   
-  quoteId: uuid('quote_id'),
-  invoiceId: uuid('invoice_id'),
+  quoteId: uuid('quote_id').references(() => quotes.id, { onDelete: 'set null' }),
+  invoiceId: uuid('invoice_id').references(() => invoices.id, { onDelete: 'set null' }),
   
   metadata: utils.metadata(),
   ...utils.audit(),
@@ -220,9 +217,9 @@ export const orders = pgTable('orders', {
 
 export const orderLineItems = pgTable('order_line_items', {
   id: utils.pk(),
-  orderId: uuid('order_id').notNull(),
-  productId: uuid('product_id'),
-  serviceId: uuid('service_id'),
+  orderId: uuid('order_id').notNull().references(() => orders.id, { onDelete: 'cascade' }),
+  productId: uuid('product_id').references(() => products.id, { onDelete: 'set null' }),
+  serviceId: uuid('service_id').references(() => services.id, { onDelete: 'set null' }),
   description: text('description').notNull(),
   itemType: text('item_type').notNull(),
   quantity: decimal('quantity', { precision: 15, scale: 4 }).notNull().default('1'),
@@ -278,8 +275,8 @@ export const serviceSubscriptions = pgTable('subscriptions', {
   id: utils.pk(),
   tenantId: utils.tenantId(),
   
-  contactId: uuid('contact_id'),
-  companyId: uuid('company_id'),
+  contactId: uuid('contact_id').references(() => contacts.id, { onDelete: 'set null' }),
+  companyId: uuid('company_id').references(() => companies.id, { onDelete: 'set null' }),
   
   name: text('name').notNull(),
   planName: text('plan_name'),

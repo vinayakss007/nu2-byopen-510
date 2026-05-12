@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
     });
   } catch (error: any) {
     console.error('[AI Score] POST error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }
 
@@ -104,6 +104,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ data: topScoredResults.rows });
   } catch (error: any) {
     console.error('[AI Score] GET error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }

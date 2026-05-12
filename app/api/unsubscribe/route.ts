@@ -55,7 +55,7 @@ export async function GET(req: NextRequest) {
       entityType: 'contact',
       entityId: contactId,
       action: 'unsubscribe'
-    }).catch(() => {});
+    }).catch((e: any) => console.error('[unsubscribe] Operation failed:', e.message));
 
     // Return a clean HTML page
     return new NextResponse(

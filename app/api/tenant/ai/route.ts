@@ -252,7 +252,8 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: `Unknown action: ${action}` }, { status: 400 });
     }
   } catch (err: any) {
-    logError({ error: err, context: 'ai-assistant' }).catch(()=>{});
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    logError({ error: err, context: 'ai-assistant' }).catch((e: any) => console.error('[tenant.ai] Operation failed:', e.message));
+    console.error('[API]', err);
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }

@@ -1,5 +1,6 @@
-import { pgTable, uuid, text, timestamp, boolean, integer, index, uniqueIndex } from 'drizzle-orm/pg-core';
-import { utils } from './utils';
+import { pgTable, uuid, text, timestamp, boolean, integer, jsonb, index, uniqueIndex } from 'drizzle-orm/pg-core';
+import * as utils from './utils';
+import { tenants, users } from './core';
 
 export const loginAttempts = pgTable('login_attempts', {
   id: utils.pk(),
@@ -30,12 +31,12 @@ export const loginBlocks = pgTable('login_blocks', {
 
 export const securityEvents = pgTable('security_events', {
   id: utils.pk(),
-  tenantId: uuid('tenant_id').references(() => utils.tenants.id, { onDelete: 'cascade' }),
-  userId: uuid('user_id').references(() => utils.users.id, { onDelete: 'set null' }),
+  tenantId: uuid('tenant_id').references(() => tenants.id, { onDelete: 'cascade' }),
+  userId: uuid('user_id').references(() => users.id, { onDelete: 'set null' }),
   eventType: text('event_type').notNull(),
   ipAddress: text('ip_address'),
   userAgent: text('user_agent'),
-  metadata: text('metadata'), // JSON stored as text
+  metadata: jsonb('metadata').default({}),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 }, (table) => ({
   tenantIdx: index('idx_security_events_tenant').on(table.tenantId),

@@ -14,6 +14,13 @@ import { randomBytes, createHash, createHmac } from 'crypto';
 import { ModuleRegistry } from '@/lib/modules/registry';
 import { isBlocked, recordFailedAttempt, recordSuccessfulLogin, getBruteForceStatus } from '@/lib/security/brute-force';
 
+function constantTimeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let result = 0;
+  for (let i = 0; i < a.length; i++) result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return result === 0;
+}
+
 // ── Login ─────────────────────────────────────────────────────
 export async function POST_login(request: NextRequest) {
   try {
@@ -26,7 +33,7 @@ export async function POST_login(request: NextRequest) {
       return NextResponse.json({ 
         error: 'Too many login attempts. Please try again later.',
         blocked_until: ipBlockCheck.blockedUntil?.toISOString(),
-        retry_after: Math.ceil((ipBlockCheck.blockedUntil?.getTime() ?? Date.now() - Date.now()) / 1000 / 60),
+        retry_after: Math.ceil(((ipBlockCheck.blockedUntil?.getTime() ?? Date.now()) - Date.now()) / 1000 / 60),
       }, { status: 429 });
     }
 
@@ -44,7 +51,7 @@ export async function POST_login(request: NextRequest) {
       return NextResponse.json({ 
         error: 'Too many login attempts for this account. Please try again later.',
         blocked_until: emailBlockCheck.blockedUntil?.toISOString(),
-        retry_after: Math.ceil((emailBlockCheck.blockedUntil?.getTime() ?? Date.now() - Date.now()) / 1000 / 60),
+        retry_after: Math.ceil(((emailBlockCheck.blockedUntil?.getTime() ?? Date.now()) - Date.now()) / 1000 / 60),
       }, { status: 429 });
     }
 
@@ -95,7 +102,7 @@ export async function POST_login(request: NextRequest) {
         const hmac = createHmac('sha1',key).update(buf).digest();
         const off = hmac[hmac.length-1]! & 0xf;
         const code = (((hmac[off]!)&0x7f)<<24|(hmac[off+1]!)<<16|(hmac[off+2]!)<<8|(hmac[off+3]!))%1000000;
-        if (String(code).padStart(6,'0') === String(totpToken)) { valid = true; break; }
+        if (constantTimeEqual(String(code).padStart(6,'0'), String(totpToken))) { valid = true; break; }
       }
       if (!valid && user.totpBackupCodes) {
         const hash = createHash('sha256').update(String(totpToken).toUpperCase()).digest('hex');
@@ -105,7 +112,7 @@ export async function POST_login(request: NextRequest) {
           await db.update(users)
             .set({ totpBackupCodes: codes.filter((x:string)=>x!==hash) })
             .where(eq(users.id, user.id))
-            .catch(()=>{});
+            .catch((e:any) => console.error('[api-handlers] Failed to update backup codes:', e.message));
         }
       }
       if (!valid) return NextResponse.json({ error:'Invalid 2FA code', requires_2fa:true }, { status:401 });
@@ -125,7 +132,6 @@ export async function POST_login(request: NextRequest) {
     await setSessionCookie(token);
     return NextResponse.json({ 
       ok:true, 
-      token,
       user:{ id:user.id, email:user.email, full_name:user.fullName, is_super_admin:user.isSuperAdmin } 
     });
   } catch (err:any) {
@@ -269,11 +275,6 @@ export async function POST_signup(request: NextRequest) {
         });
       }
 
-      // 4. Activate Core Modules
-      await ModuleRegistry.install(t.id, 'core-crm', u.id);
-      await ModuleRegistry.install(t.id, 'automation-basic', u.id);
-      await ModuleRegistry.install(t.id, 'service-helpdesk', u.id);
-      
       // Normalized onboarding progress
       await tx.insert(onboardingProgress).values({
         tenantId: t.id,
@@ -281,10 +282,19 @@ export async function POST_signup(request: NextRequest) {
         stepName: 'account_created',
         isCompleted: true,
         completedAt: new Date(),
-      }).onConflictDoNothing();
+      }).onConflictDoNothing({ target: [onboardingProgress.tenantId, onboardingProgress.userId, onboardingProgress.stepName] });
 
       return { user: u, tenant: t };
     });
+
+    // Install modules after tenant is committed (outside transaction to avoid FK issues)
+    const coreModules = ['core-crm', 'automation-basic', 'service-helpdesk'];
+    for (const modId of coreModules) {
+      const result = await ModuleRegistry.install(tenant.id, modId, user.id);
+      if (!result.ok) {
+        console.error(`[signup] Failed to install module ${modId}:`, result.error);
+      }
+    }
 
     // Session
     const token = await createToken(user.id);
@@ -302,7 +312,7 @@ export async function POST_signup(request: NextRequest) {
       message: `**${user.fullName}** (${user.email}) joined\nWorkspace: **${tenant.name}** (\`${tenant.slug}\`)`,
       color: '#10b981',
       url: `${process.env.NEXT_PUBLIC_APP_URL}/tenant`,
-    }).catch(() => {});
+    }).catch((e:any) => console.error('[api-handlers] Webhook notification failed:', e.message));
 
     // Send Telegram notification if user configured it (fire-and-forget)
     sendTelegram({
@@ -312,7 +322,7 @@ export async function POST_signup(request: NextRequest) {
       message: `${user.fullName} (${user.email}) joined\nWorkspace: ${tenant.name} (${tenant.slug})`,
       icon: '🟢',
       url: `${process.env.NEXT_PUBLIC_APP_URL}/tenant`,
-    }).catch(() => {});
+    }).catch((e:any) => console.error('[api-handlers] Telegram notification failed:', e.message));
 
     // Send verification email (fire-and-forget)
     if (process.env.RESEND_API_KEY || process.env.SMTP_HOST) {
@@ -338,7 +348,7 @@ export async function POST_signup(request: NextRequest) {
     return NextResponse.json({ ok:true, user:{ id:user.id, email:user.email, full_name:user.fullName }, tenant:{ id:tenant.id, name:tenant.name, slug:tenant.slug } }, { status:201 });
   } catch (err:any) {
     devLogger.error(err as Error, '[auth/signup]');
-    return NextResponse.json({ error: err.message ?? 'Signup failed.' }, { status:500 });
+    return NextResponse.json({ error: 'Signup failed. Please try again.' }, { status:500 });
   }
 }
 
@@ -348,7 +358,7 @@ export async function POST_logout(request: NextRequest) {
     const token = request.cookies.get('nucrm_session')?.value;
     if (token) {
       const tokenHash = await hashToken(token);
-      await db.delete(sessions).where(eq(sessions.tokenHash, tokenHash)).catch(()=>{});
+      await db.delete(sessions).where(eq(sessions.tokenHash, tokenHash)).catch((e:any) => console.error('[api-handlers] Failed to delete session:', e.message));
     }
     await clearSessionCookie();
     return NextResponse.json({ ok:true });

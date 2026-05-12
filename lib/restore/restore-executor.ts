@@ -146,7 +146,7 @@ export async function createPreRestoreSnapshot(
   
   for (const table of tables) {
     try {
-      const result = await db.execute(sql.raw(`SELECT * FROM public.${table} WHERE tenant_id = '${tenantId}'`));
+      const result = await db.execute(sql`SELECT * FROM ${sql.identifier(table)} WHERE tenant_id = ${tenantId}`);
       snapshotData[table] = result.rows;
       totalRecords += result.rows.length;
     } catch {
@@ -181,7 +181,7 @@ export async function rollbackToSnapshot(snapshotId: string, tenantId: string): 
   await db.transaction(async (tx) => {
     for (const [table, rows] of Object.entries(snapshotData)) {
       // Delete current data
-      await tx.execute(sql.raw(`DELETE FROM public.${table} WHERE tenant_id = '${tenantId}'`));
+      await tx.execute(sql`DELETE FROM ${sql.identifier(table)} WHERE tenant_id = ${tenantId}`);
       
       // Restore from snapshot
       if (Array.isArray(rows) && rows.length > 0) {

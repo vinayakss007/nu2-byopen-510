@@ -205,11 +205,11 @@ export async function POST(request: NextRequest) {
       userId: ctx.userId,
       event: 'contact.created', 
       data: { ...(contact as any) },
-    }).catch(() => {});
+    }).catch((e: any) => console.error('[tenant.contacts] Operation failed:', e.message));
 
     return NextResponse.json({ data: contact }, { status: 201 });
   } catch (err: any) {
     console.error('[contacts POST]', err);
-    return NextResponse.json({ error: err.message ?? 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ error: 'An unexpected error occurred' ?? 'Internal server error' }, { status: 500 });
   }
 }

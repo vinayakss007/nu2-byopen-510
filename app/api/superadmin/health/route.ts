@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
         status: c.status === 'up' ? 'ok' : 'error',
         latencyMs: c.latency_ms,
         message: c.message,
-      }).catch(() => {});
+      }).catch((e: any) => console.error('[superadmin.health] Operation failed:', e.message));
     }
 
     const history = await db
@@ -63,7 +63,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ checks, history });
   } catch (err: any) {
     console.error('[superadmin/health GET]', err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }
 

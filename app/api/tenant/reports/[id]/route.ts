@@ -65,7 +65,7 @@ export async function GET(
     });
   } catch (error: any) {
     console.error('[Report] GET error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }
 
@@ -126,7 +126,7 @@ export async function PATCH(
     });
   } catch (error: any) {
     console.error('[Report] PATCH error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }
 
@@ -161,7 +161,7 @@ export async function DELETE(
     });
   } catch (error: any) {
     console.error('[Report] DELETE error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }
 
@@ -194,6 +194,6 @@ export async function POST(
     });
   } catch (error: any) {
     console.error('[Report Run] POST error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }

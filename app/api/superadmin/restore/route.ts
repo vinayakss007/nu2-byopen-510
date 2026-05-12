@@ -80,7 +80,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ data: backups });
   } catch (err: any) {
     console.error('[superadmin/restore GET]', err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }
 
@@ -115,7 +115,7 @@ export async function POST(request: NextRequest) {
       level: 'warn',
       code: 'RESTORE_INITIATED',
       message: `Database restore initiated from backup: ${backup.storagePath} by user ${ctx.userId}`,
-    }).catch(() => {});
+    }).catch((e: any) => console.error('[superadmin.restore] Operation failed:', e.message));
 
     let localPath = backup.storagePath;
     let tempFileCreated = false;
@@ -149,7 +149,7 @@ export async function POST(request: NextRequest) {
       level: 'info',
       code: 'RESTORE_COMPLETED',
       message: `Database restore completed from ${backup.storagePath} in ${durationMs}ms`,
-    }).catch(() => {});
+    }).catch((e: any) => console.error('[superadmin.restore] Operation failed:', e.message));
 
     return NextResponse.json({
       ok: true,
@@ -163,8 +163,8 @@ export async function POST(request: NextRequest) {
       code: 'RESTORE_FAILED',
       message: err.message,
       stack: err.stack?.slice(0, 2000),
-    }).catch(() => {});
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    }).catch((e: any) => console.error('[superadmin.restore] Operation failed:', e.message));
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }
 

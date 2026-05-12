@@ -65,7 +65,7 @@ export async function GET(
     });
   } catch (error: any) {
     console.error('[Timeline] GET error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }
 
@@ -119,6 +119,6 @@ export async function POST(
     }, { status: 201 });
   } catch (error: any) {
     console.error('[Timeline] POST error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }

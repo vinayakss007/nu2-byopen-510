@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
     const result = await resetPassword(token, newPassword);
 
     if (!result.success) {
-      return NextResponse.json({ error: result.message }, { status: 400 });
+      return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 400 });
     }
 
     return NextResponse.json({

@@ -174,13 +174,13 @@ export async function POST(req: NextRequest) {
         await db.update(sequenceEnrollments)
           .set({ nextStepAt: new Date(Date.now() + 3600000) })
           .where(eq(sequenceEnrollments.id, enrollment.id))
-          .catch(() => {});
+          .catch((e: any) => console.error('[cron.process-sequences] Operation failed:', e.message));
       }
     }
 
     return NextResponse.json({ ok: true, processed });
   } catch (err: any) {
     console.error('[Sequence Processor] Fatal error:', err.message);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }

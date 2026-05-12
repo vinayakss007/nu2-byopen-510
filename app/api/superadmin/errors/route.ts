@@ -64,7 +64,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ errors, summary });
   } catch (err: any) {
     console.error('[superadmin/errors GET]', err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }
 
@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
       tenantId: tenant_id || null,
       stack: stack || null,
       context: context || null,
-    }).catch(() => {});
+    }).catch((e: any) => console.error('[superadmin.errors] Operation failed:', e.message));
     return NextResponse.json({ ok: true }, { status: 201 });
   } catch {
     return NextResponse.json({ ok: true }, { status: 201 });
@@ -111,7 +111,7 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ ok: true });
   } catch (err: any) {
     console.error('[superadmin/errors PATCH]', err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }
 

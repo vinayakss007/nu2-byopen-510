@@ -37,7 +37,8 @@ export async function GET(req: NextRequest, { params }: any) {
       { headers: {'Access-Control-Allow-Origin':'*'} }
     );
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500, headers: {'Access-Control-Allow-Origin':'*'} });
+    console.error('[API]', err);
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500, headers: {'Access-Control-Allow-Origin':'*'} });
   }
 }
 

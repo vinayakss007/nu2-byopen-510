@@ -100,7 +100,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: true, data: result }, { status: 201 });
   } catch (err: any) {
     console.error('[members POST]', err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }
 
@@ -145,7 +145,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ data: members, invitations: invites, tenantId: ctx.tenantId });
   } catch (err: any) {
     console.error('[members GET]', err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }
 
@@ -262,6 +262,6 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ ok: true });
   } catch (err: any) {
     console.error('[members PATCH]', err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }

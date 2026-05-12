@@ -34,7 +34,8 @@ export async function GET(req: NextRequest, { params }: any) {
     .limit(50);
 
     return NextResponse.json({ data: { ...form, submissions } });
-  } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
+  } catch (err: any) { console.error('[API]', err);
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 }); }
 }
 
 export async function PATCH(req: NextRequest, { params }: any) {
@@ -73,7 +74,8 @@ export async function PATCH(req: NextRequest, { params }: any) {
 
     if (!row) return NextResponse.json({ error: 'Not found' }, { status: 404 });
     return NextResponse.json({ data: row });
-  } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
+  } catch (err: any) { console.error('[API]', err);
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 }); }
 }
 
 export async function DELETE(req: NextRequest, { params }: any) {
@@ -85,5 +87,6 @@ export async function DELETE(req: NextRequest, { params }: any) {
 
     await db.delete(forms).where(and(eq(forms.id, id), eq(forms.tenantId, ctx.tenantId)));
     return NextResponse.json({ ok: true });
-  } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
+  } catch (err: any) { console.error('[API]', err);
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 }); }
 }

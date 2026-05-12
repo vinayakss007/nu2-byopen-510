@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: true, message: 'Impersonation ended' });
   } catch (err: any) {
     console.error('[Impersonation Stop] Error:', err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }
 
@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ data: res.rows });
   } catch (err: any) {
     console.error('[Impersonation List] Error:', err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }
 

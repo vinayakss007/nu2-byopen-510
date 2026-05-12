@@ -50,13 +50,18 @@ services:
     environment:
       DATABASE_URL: postgresql://nucrm:nucrm_secure_password@db:5432/nucrm
       REDIS_URL: redis://redis:6379
-      NODE_ENV: production
-      JWT_SECRET: ${JWT_SECRET:-change-this-in-production}
-      SESSION_SECRET: ${SESSION_SECRET:-change-this-in-production}
+      NODE_ENV: development
+      JWT_SECRET: ${JWT_SECRET:-dev-jwt-secret-change-in-production}
+      SESSION_SECRET: ${SESSION_SECRET:-dev-session-secret-change-in-production}
+      CRON_SECRET: ${CRON_SECRET:-dev-cron-secret}
+    command: ["npm", "run", "dev"]
     ports:
       - "3000:3000"
     volumes:
       - ./uploads:/app/uploads
+      - .:/app
+      - /app/node_modules
+      - /app/.next
 
   # Cron Job for Backups
   backup:

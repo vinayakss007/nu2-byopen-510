@@ -99,7 +99,7 @@ export async function POST(request: NextRequest) {
     });
   } catch (err: any) {
     console.error('[trash-auto-cleanup]', err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }
 
@@ -151,6 +151,6 @@ export async function GET(request: NextRequest) {
     });
   } catch (err: any) {
     console.error('[trash-cleanup-status]', err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }

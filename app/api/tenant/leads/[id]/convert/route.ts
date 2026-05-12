@@ -161,7 +161,7 @@ export async function POST(
         activityType: 'converted',
         description: 'Lead converted to contact',
         activityData: { contact_id: contactId, created_by: ctx.userId }
-      }).catch(() => {});
+      }).catch((e: any) => console.error('[tenant.leads.[id].convert] Operation failed:', e.message));
 
       // ── 4. Optionally create a deal ─────────────────────────────────
       let dealId: string | null = null;
@@ -216,7 +216,7 @@ export async function POST(
             entityType: 'deal',
             entityId: dealId,
             action: 'create',
-          }).catch(() => {});
+          }).catch((e: any) => console.error('[tenant.leads.[id].convert] Operation failed:', e.message));
         }
       }
 
@@ -234,7 +234,7 @@ export async function POST(
       id: result.contactId,
       lead_id: id,
       converted_from_lead: true,
-    }).catch(() => {});
+    }).catch((e: any) => console.error('[tenant.leads.[id].convert] Operation failed:', e.message));
 
     // Notify assignee if different from converter
     if (assignee !== ctx.userId) {
@@ -258,6 +258,6 @@ export async function POST(
 
   } catch (error: any) {
     console.error('[lead convert] error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }

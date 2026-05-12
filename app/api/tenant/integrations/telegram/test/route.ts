@@ -39,6 +39,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ ok: true, message: 'Test message sent successfully' });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message || 'Failed to send test message' }, { status: 500 });
+    console.error('[API]', err);
+    return NextResponse.json({ error: 'An unexpected error occurred' || 'Failed to send test message' }, { status: 500 });
   }
 }

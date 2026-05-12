@@ -48,7 +48,7 @@ export async function GET(
     });
   } catch (error: any) {
     console.error('[Workflow] GET error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }
 
@@ -141,7 +141,7 @@ export async function PATCH(
     });
   } catch (error: any) {
     console.error('[Workflow] PATCH error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }
 
@@ -169,7 +169,7 @@ export async function DELETE(
     });
   } catch (error: any) {
     console.error('[Workflow] DELETE error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }
 
@@ -210,6 +210,6 @@ export async function POST(
     });
   } catch (error: any) {
     console.error('[Workflow Test] POST error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }

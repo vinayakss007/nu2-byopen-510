@@ -61,10 +61,11 @@ export async function POST(request: NextRequest) {
       title: '🔑 Password Changed',
       message: 'Your account password has been successfully changed. If this wasn\'t you, contact support immediately.',
       icon: '⚠️',
-    }).catch(() => {});
+    }).catch((e: any) => console.error('[auth.reset-password] Operation failed:', e.message));
 
     return NextResponse.json({ ok: true });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    console.error('[API]', err);
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }

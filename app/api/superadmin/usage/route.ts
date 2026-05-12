@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
     if (!ctx.isSuperAdmin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
     // Trigger usage snapshot
-    await db.execute(sql`SELECT public.snapshot_tenant_usage()`).catch(() => {});
+    await db.execute(sql`SELECT public.snapshot_tenant_usage()`).catch((e: any) => console.error('[superadmin.usage] Operation failed:', e.message));
 
     const [tenantUsage, growth] = await Promise.all([
       db.select({
@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ tenantUsage, growth });
   } catch (err: any) {
     console.error('[superadmin/usage GET]', err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }
 

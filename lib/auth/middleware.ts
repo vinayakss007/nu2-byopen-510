@@ -280,9 +280,9 @@ export function requireCsrf(request: NextRequest): NextResponse | null {
   const method = request.method;
   const path = request.nextUrl.pathname;
 
-  const authMethod = request.headers.get('x-auth-method');
+  const authHeader = request.headers.get('authorization');
 
-  if (!needsCsrfValidation(method, path, authMethod ?? undefined)) {
+  if (!needsCsrfValidation(method, path, authHeader ?? undefined)) {
     return null;
   }
 

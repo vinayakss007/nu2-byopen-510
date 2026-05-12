@@ -105,10 +105,10 @@ export async function POST(request: NextRequest) {
     
     // Handle specific database errors
     if (error.message?.includes('not found')) {
-      return NextResponse.json({ error: error.message }, { status: 404 });
+      return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 404 });
     }
     
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }
 
@@ -152,7 +152,7 @@ export async function GET(request: NextRequest) {
     });
   } catch (error: any) {
     console.error('[Merge History] GET error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }
 

@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ data: config });
   } catch (err: any) {
     console.error('[portal config GET]', err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }
 
@@ -63,6 +63,6 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ ok: true, data: config });
   } catch (err: any) {
     console.error('[portal config PUT]', err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }

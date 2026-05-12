@@ -452,7 +452,7 @@ describe('Drizzle Schema - Foreign Key Relationships', () => {
   });
 
   it('emailCampaigns references emailTemplates', () => {
-    const table =.schema.emailCampaigns;
+    const table = schema.emailCampaigns;
     expect(table.templateId).toBeDefined();
   });
 
@@ -586,7 +586,7 @@ describe('Drizzle Query Builder - SELECT Operations', () => {
       .from(schema.contacts)
       .where(
         and(
-          eq(schema.contacts.tenantId, 'tenant-1'),
+          eq(schema.contacts.tenantId, '00000000-0000-0000-0000-000000000001'),
           eq(schema.contacts.leadStatus, 'new')
         )
       );
@@ -746,7 +746,7 @@ describe('Drizzle Query Builder - SELECT Operations', () => {
       })
       .from(schema.contacts)
       .leftJoin(schema.companies, eq(schema.contacts.companyId, schema.companies.id))
-      .where(eq(schema.contacts.tenantId, 'tenant-1'));
+      .where(eq(schema.contacts.tenantId, '00000000-0000-0000-0000-000000000001'));
     
     expect(mockPool.query).toHaveBeenCalled();
   });
@@ -762,7 +762,7 @@ describe('Drizzle Query Builder - SELECT Operations', () => {
     const result = await db
       .select({ count: count() })
       .from(schema.contacts)
-      .where(eq(schema.contacts.tenantId, 'tenant-1'));
+      .where(eq(schema.contacts.tenantId, '00000000-0000-0000-0000-000000000001'));
     
     expect(mockPool.query).toHaveBeenCalled();
     expect(result[0]?.count).toBe(5);
@@ -779,7 +779,7 @@ describe('Drizzle Query Builder - SELECT Operations', () => {
     const result = await db
       .select({ total: sum(schema.deals.value) })
       .from(schema.deals)
-      .where(eq(schema.deals.tenantId, 'tenant-1'));
+      .where(eq(schema.deals.tenantId, '00000000-0000-0000-0000-000000000001'));
     
     expect(mockPool.query).toHaveBeenCalled();
   });
@@ -820,7 +820,7 @@ describe('Drizzle Query Builder - INSERT Operations', () => {
     const newTenant = {
       name: 'Test Tenant',
       slug: 'test-tenant',
-      ownerId: 'user-1',
+      ownerId: '00000000-0000-0000-0000-000000000002',
     };
     
     const result = await db.insert(schema.tenants).values(newTenant).returning();
@@ -854,7 +854,7 @@ describe('Drizzle Query Builder - INSERT Operations', () => {
     }));
 
     const newContact = {
-      tenantId: 'tenant-1',
+      tenantId: '00000000-0000-0000-0000-000000000001',
       firstName: 'John',
       lastName: 'Doe',
       email: 'john@example.com',
@@ -874,11 +874,11 @@ describe('Drizzle Query Builder - INSERT Operations', () => {
     }));
 
     const newDeal = {
-      tenantId: 'tenant-1',
+      tenantId: '00000000-0000-0000-0000-000000000001',
       title: 'Test Deal',
       value: 1000,
-      pipelineId: 'pipeline-1',
-      stageId: 'stage-1',
+      pipelineId: '00000000-0000-0000-0000-000000000004',
+      stageId: '00000000-0000-0000-0000-000000000005',
     };
     
     const result = await db.insert(schema.deals).values(newDeal).returning();
@@ -894,9 +894,9 @@ describe('Drizzle Query Builder - INSERT Operations', () => {
     }));
 
     const newTasks = [
-      { tenantId: 'tenant-1', title: 'Task 1', status: 'todo' },
-      { tenantId: 'tenant-1', title: 'Task 2', status: 'todo' },
-      { tenantId: 'tenant-1', title: 'Task 3', status: 'todo' },
+      { tenantId: '00000000-0000-0000-0000-000000000001', title: 'Task 1', status: 'todo' },
+      { tenantId: '00000000-0000-0000-0000-000000000001', title: 'Task 2', status: 'todo' },
+      { tenantId: '00000000-0000-0000-0000-000000000001', title: 'Task 3', status: 'todo' },
     ];
     
     await db.insert(schema.tasks).values(newTasks);
@@ -955,7 +955,7 @@ describe('Drizzle Query Builder - UPDATE Operations', () => {
     await db
       .update(schema.tenants)
       .set({ name: 'Updated Tenant' })
-      .where(eq(schema.tenants.id, 'tenant-1'))
+      .where(eq(schema.tenants.id, '00000000-0000-0000-0000-000000000001'))
       .returning();
     
     expect(mockPool.query).toHaveBeenCalled();
@@ -972,7 +972,7 @@ describe('Drizzle Query Builder - UPDATE Operations', () => {
     await db
       .update(schema.users)
       .set({ fullName: 'Updated Name' })
-      .where(eq(schema.users.id, 'user-1'));
+      .where(eq(schema.users.id, '00000000-0000-0000-0000-000000000002'));
     
     expect(mockPool.query).toHaveBeenCalled();
   });
@@ -1011,7 +1011,7 @@ describe('Drizzle Query Builder - UPDATE Operations', () => {
       .set({ status: 'closed' })
       .where(
         and(
-          eq(schema.deals.tenantId, 'tenant-1'),
+          eq(schema.deals.tenantId, '00000000-0000-0000-0000-000000000001'),
           eq(schema.deals.status, 'open')
         )
       );
@@ -1030,7 +1030,7 @@ describe('Drizzle Query Builder - UPDATE Operations', () => {
     const result = await db
       .update(schema.tasks)
       .set({ status: 'completed' })
-      .where(eq(schema.tasks.id, 'task-1'))
+      .where(eq(schema.tasks.id, '00000000-0000-0000-0000-000000000003'))
       .returning();
     
     expect(mockPool.query).toHaveBeenCalled();
@@ -1053,7 +1053,7 @@ describe('Drizzle Query Builder - DELETE Operations', () => {
 
     await db
       .delete(schema.tenants)
-      .where(eq(schema.tenants.id, 'tenant-1'))
+      .where(eq(schema.tenants.id, '00000000-0000-0000-0000-000000000001'))
       .returning();
     
     expect(mockPool.query).toHaveBeenCalled();
@@ -1069,7 +1069,7 @@ describe('Drizzle Query Builder - DELETE Operations', () => {
 
     await db
       .delete(schema.users)
-      .where(eq(schema.users.id, 'user-1'));
+      .where(eq(schema.users.id, '00000000-0000-0000-0000-000000000002'));
     
     expect(mockPool.query).toHaveBeenCalled();
   });
@@ -1086,7 +1086,7 @@ describe('Drizzle Query Builder - DELETE Operations', () => {
       .delete(schema.contacts)
       .where(
         and(
-          eq(schema.contacts.tenantId, 'tenant-1'),
+          eq(schema.contacts.tenantId, '00000000-0000-0000-0000-000000000001'),
           eq(schema.contacts.isArchived, true)
         )
       );
@@ -1104,7 +1104,7 @@ describe('Drizzle Query Builder - DELETE Operations', () => {
 
     const result = await db
       .delete(schema.tasks)
-      .where(eq(schema.tasks.id, 'task-1'))
+      .where(eq(schema.tasks.id, '00000000-0000-0000-0000-000000000003'))
       .returning();
     
     expect(mockPool.query).toHaveBeenCalled();
@@ -1188,7 +1188,7 @@ describe('Drizzle - Raw SQL Queries', () => {
       getPool: vi.fn().mockReturnValue(mockPool),
     }));
 
-    const tenantId = 'tenant-1';
+    const tenantId = '00000000-0000-0000-0000-000000000001';
     await db.execute(sql`SELECT * FROM contacts WHERE tenant_id = ${tenantId}`);
     expect(mockPool.execute).toHaveBeenCalled();
   });
@@ -1213,7 +1213,7 @@ describe('Drizzle - Raw SQL Queries', () => {
       getPool: vi.fn().mockReturnValue(mockPool),
     }));
 
-    await db.execute(sql`UPDATE users SET full_name = 'Test' WHERE id = 'user-1'`);
+    await db.execute(sql`UPDATE users SET full_name = 'Test' WHERE id = '00000000-0000-0000-0000-000000000002'`);
     expect(mockPool.execute).toHaveBeenCalled();
   });
 
@@ -1225,7 +1225,7 @@ describe('Drizzle - Raw SQL Queries', () => {
       getPool: vi.fn().mockReturnValue(mockPool),
     }));
 
-    await db.execute(sql`DELETE FROM tasks WHERE id = 'task-1'`);
+    await db.execute(sql`DELETE FROM tasks WHERE id = '00000000-0000-0000-0000-000000000003'`);
     expect(mockPool.execute).toHaveBeenCalled();
   });
 });
@@ -1433,9 +1433,9 @@ describe('Drizzle Schema - Default Values', () => {
   });
 
   it('array columns have default empty array', () => {
-    expect(schema.companies.tags.default).toEqual(\'{}\');
-    expect(schema.contacts.tags.default).toEqual(\'{}\');
-    expect(schema.leads.tags.default).toEqual(\'{}\');
+    expect(schema.companies.tags.default).toEqual('{}');
+    expect(schema.contacts.tags.default).toEqual('{}');
+    expect(schema.leads.tags.default).toEqual('{}');
   });
 });
 
@@ -1527,7 +1527,7 @@ describe('Drizzle - Complex Queries', () => {
       .leftJoin(schema.contacts, eq(schema.deals.contactId, schema.contacts.id))
       .leftJoin(schema.companies, eq(schema.deals.companyId, schema.companies.id))
       .leftJoin(schema.pipelines, eq(schema.deals.pipelineId, schema.pipelines.id))
-      .where(eq(schema.deals.tenantId, 'tenant-1'))
+      .where(eq(schema.deals.tenantId, '00000000-0000-0000-0000-000000000001'))
       .orderBy(desc(schema.deals.createdAt))
       .limit(10);
 
@@ -1545,7 +1545,7 @@ describe('Drizzle - Complex Queries', () => {
     const subquery = db
       .select({ contactId: schema.contacts.id })
       .from(schema.contacts)
-      .where(eq(schema.contacts.tenantId, 'tenant-1'));
+      .where(eq(schema.contacts.tenantId, '00000000-0000-0000-0000-000000000001'));
 
     await db
       .select()
@@ -1587,7 +1587,7 @@ describe('Drizzle - Complex Queries', () => {
     await db
       .select()
       .from(schema.contacts)
-      .where(inArray(schema.contacts.id, ['c1', 'c2', 'c3']));
+      .where(inArray(schema.contacts.id, [00000000-0000-0000-0000-000000000006, 00000000-0000-0000-0000-000000000007, 00000000-0000-0000-0000-000000000008]));
 
     expect(mockPool.query).toHaveBeenCalled();
   });
@@ -1603,7 +1603,7 @@ describe('Drizzle - Complex Queries', () => {
     await db
       .select()
       .from(schema.contacts)
-      .where(not(inArray(schema.contacts.id, ['c1', 'c2'])));
+      .where(not(inArray(schema.contacts.id, [00000000-0000-0000-0000-000000000006, 00000000-0000-0000-0000-000000000007])));
 
     expect(mockPool.query).toHaveBeenCalled();
   });

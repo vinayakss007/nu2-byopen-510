@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ data });
   } catch (err: any) {
     console.error('[superadmin/announcements GET]', err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }
 
@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ data: row }, { status: 201 });
   } catch (err: any) {
     console.error('[superadmin/announcements POST]', err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }
 
@@ -76,7 +76,7 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ ok: true });
   } catch (err: any) {
     console.error('[superadmin/announcements DELETE]', err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }
 

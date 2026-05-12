@@ -27,5 +27,6 @@ export async function GET(req: NextRequest, { params }: any) {
       .limit(50);
 
     return NextResponse.json({ data });
-  } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
+  } catch (err: any) { console.error('[API]', err);
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 }); }
 }

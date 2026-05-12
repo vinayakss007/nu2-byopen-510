@@ -43,6 +43,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: true, cleaned: r });
   } catch (err: any) { 
     console.error('[Cleanup] Error:', err);
-    return NextResponse.json({ error: err.message }, { status: 500 }); 
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 }); 
   }
 }

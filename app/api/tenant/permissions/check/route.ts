@@ -8,5 +8,6 @@ export async function POST(request: NextRequest) {
     const { permission } = await request.json();
     if (!permission) return NextResponse.json({ error: 'permission required' }, { status: 400 });
     return NextResponse.json({ allowed: can(ctx, permission), roleSlug: ctx.roleSlug });
-  } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
+  } catch (err: any) { console.error('[API]', err);
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 }); }
 }

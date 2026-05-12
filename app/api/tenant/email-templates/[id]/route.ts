@@ -35,7 +35,8 @@ export async function GET(request: NextRequest, { params }: any) {
     if (!row) return NextResponse.json({ error: 'Template not found' }, { status: 404 });
     return NextResponse.json({ data: row });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    console.error('[API]', err);
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }
 
@@ -75,7 +76,8 @@ export async function PATCH(request: NextRequest, { params }: any) {
     if (!row) return NextResponse.json({ error: 'Template not found' }, { status: 404 });
     return NextResponse.json({ data: row });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    console.error('[API]', err);
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }
 
@@ -97,6 +99,7 @@ export async function DELETE(request: NextRequest, { params }: any) {
     if (!row) return NextResponse.json({ error: 'Template not found' }, { status: 404 });
     return NextResponse.json({ ok: true });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    console.error('[API]', err);
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }

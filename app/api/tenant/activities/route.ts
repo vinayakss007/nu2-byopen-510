@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ data: results || [] });
   } catch (err: any) {
     console.error('[activities GET]', err);
-    return NextResponse.json({ data: [], error: err.message }, { status: 200 });
+    return NextResponse.json({ data: [], error: 'An unexpected error occurred' }, { status: 200 });
   }
 }
 
@@ -77,6 +77,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ data: newActivity }, { status: 201 });
   } catch (err: any) {
     console.error('[activities POST]', err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }

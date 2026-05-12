@@ -38,12 +38,28 @@ interface Deal {
   created_at: string
 }
 
+interface Contact {
+  id: string;
+  first_name: string;
+  last_name: string;
+}
+
+interface Company {
+  id: string;
+  name: string;
+}
+
+interface TeamMember {
+  user_id: string;
+  full_name: string;
+}
+
 interface Props {
-  initialDeals: any[]
-  contacts: any[]
-  companies: any[]
-  teamMembers: any[]
-  permissions: { canCreate: boolean; canEdit: boolean; canDelete: boolean }
+  initialDeals: Deal[];
+  contacts: Contact[];
+  companies: Company[];
+  teamMembers: TeamMember[];
+  permissions: { canCreate: boolean; canEdit: boolean; canDelete: boolean };
 }
 
 export default function DealsDataTable({ initialDeals, contacts, companies, teamMembers, permissions }: Props) {
@@ -307,7 +323,7 @@ export default function DealsDataTable({ initialDeals, contacts, companies, team
                 className={inp}
               >
                 <option value="">No contact</option>
-                {(contacts || []).map((c: any) => (
+                {(contacts || []).map((c) => (
                   <option key={c.id} value={c.id}>{c.first_name} {c.last_name}</option>
                 ))}
               </select>
@@ -320,7 +336,7 @@ export default function DealsDataTable({ initialDeals, contacts, companies, team
                 className={inp}
               >
                 <option value="">No company</option>
-                {(companies || []).map((c: any) => (
+                {(companies || []).map((c) => (
                   <option key={c.id} value={c.id}>{c.name}</option>
                 ))}
               </select>
@@ -333,7 +349,7 @@ export default function DealsDataTable({ initialDeals, contacts, companies, team
                 className={inp}
               >
                 <option value="">Unassigned</option>
-                {(teamMembers || []).map((m: any) => (
+                {(teamMembers || []).map((m) => (
                   <option key={m.user_id} value={m.user_id}>{m.full_name}</option>
                 ))}
               </select>

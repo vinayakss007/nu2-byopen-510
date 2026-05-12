@@ -204,7 +204,7 @@ export class ModuleRegistry {
           category: manifest.category,
           icon: manifest.icon,
           manifest: manifest,
-        }).onConflictDoNothing();
+        }).onConflictDoNothing({ target: modules.id });
 
         // Install for tenant
         await tx.insert(tenantModules).values({

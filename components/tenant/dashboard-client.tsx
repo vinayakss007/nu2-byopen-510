@@ -1,4 +1,5 @@
 'use client';
+import type { ComponentType } from 'react';
 import { useState, useEffect } from 'react';
 import {
   Users, Building2, TrendingUp, CheckSquare, DollarSign,
@@ -7,6 +8,62 @@ import {
 } from 'lucide-react';
 import { formatCurrency, formatRelativeTime, formatDate, cn } from '@/lib/utils';
 import Link from 'next/link';
+
+interface Activity {
+  id: string;
+  type: string;
+  description: string;
+  full_name?: string;
+  created_at: string;
+}
+
+interface Task {
+  id: string;
+  title: string;
+  due_date?: string;
+  priority: string;
+}
+
+interface Deal {
+  id: string;
+  title: string;
+  stage: string;
+  value: number;
+}
+
+interface Contact {
+  id: string;
+  first_name: string;
+  last_name: string;
+  email?: string;
+  company_name?: string;
+  lead_status: string;
+  created_at: string;
+}
+
+interface DashboardData {
+  contactCount: number;
+  companyCount: number;
+  pipeline: number;
+  openDealsCount: number;
+  wonThisMonth: number;
+  tasksDueToday: number;
+  overdueTasks: number;
+  activities: Activity[];
+  tasks: Task[];
+  upcomingDeals: Deal[];
+  recentContacts: Contact[];
+}
+
+interface StatCardProps {
+  icon: ComponentType<{ className?: string }>;
+  label: string;
+  value: string | number;
+  sub: string;
+  color: string;
+  href?: string;
+  loading?: boolean;
+}
 
 const STAGE_COLORS: Record<string,string> = {
   lead:'text-slate-500 bg-slate-100 dark:bg-slate-800 dark:text-slate-400',
@@ -21,7 +78,7 @@ function Skeleton({ className }: { className?: string }) {
   return <div className={cn('animate-pulse bg-muted rounded-lg', className)} />;
 }
 
-function StatCard({ icon: Icon, label, value, sub, color, href, loading }: any) {
+function StatCard({ icon: Icon, label, value, sub, color, href, loading }: StatCardProps) {
   const content = (
     <div className="admin-card p-5 hover:border-violet-300 dark:hover:border-violet-700/50 transition-all group">
       <div className="flex items-start justify-between mb-3">
@@ -42,7 +99,7 @@ function StatCard({ icon: Icon, label, value, sub, color, href, loading }: any) 
 export default function DashboardClient({ tenantId, userId, planName, isAdmin }: {
   tenantId: string; userId: string; planName: string; isAdmin: boolean;
 }) {
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -94,7 +151,7 @@ export default function DashboardClient({ tenantId, userId, planName, isAdmin }:
       });
   }, [tenantId]);
 
-  const ACTIVITY_ICONS: Record<string,any> = {
+  const ACTIVITY_ICONS: Record<string, ComponentType<{ className?: string }>> = {
     note: Activity, call: Target, email: Activity,
     meeting: Calendar, created: Zap, task_completed: CheckSquare,
     deal_won: TrendingUp, stage_change: TrendingUp,
@@ -134,7 +191,7 @@ export default function DashboardClient({ tenantId, userId, planName, isAdmin }:
             : !(data?.activities?.length)
               ? <div className="py-10 text-center text-sm text-muted-foreground">No activity yet — start by adding contacts</div>
               : <div className="divide-y divide-border">
-                  {(data.activities ?? []).map((a: any) => {
+                  {(data.activities ?? []).map((a) => {
                     const Icon = ACTIVITY_ICONS[a.type] ?? Activity;
                     return (
                       <div key={a.id} className="flex items-start gap-3 px-5 py-3 hover:bg-accent/20 transition-colors">
@@ -168,7 +225,7 @@ export default function DashboardClient({ tenantId, userId, planName, isAdmin }:
                 : <div className="divide-y divide-border">
                     {(() => {
                       const today = new Date().toISOString().split('T')[0] || '';
-                      return (data.tasks ?? []).slice(0,5).map((t: any) => {
+                      return (data.tasks ?? []).slice(0,5).map((t) => {
                         const overdue = t.due_date && t.due_date < today;
                         return (
                           <Link key={t.id} href="/tenant/tasks" className="flex items-center gap-2.5 px-4 py-2.5 hover:bg-accent/20 transition-colors">
@@ -193,7 +250,7 @@ export default function DashboardClient({ tenantId, userId, planName, isAdmin }:
               : !(data?.upcomingDeals?.length)
                 ? <p className="text-sm text-muted-foreground text-center py-6">No deals closing soon</p>
                 : <div className="divide-y divide-border">
-                    {(data.upcomingDeals ?? []).map((d: any) => (
+                    {(data.upcomingDeals ?? []).map((d) => (
                       <Link key={d.id} href="/tenant/deals" className="flex items-center gap-2.5 px-4 py-2.5 hover:bg-accent/20 transition-colors">
                         <div className="flex-1 min-w-0">
                           <p className="text-xs font-medium truncate">{d.title}</p>
@@ -218,7 +275,7 @@ export default function DashboardClient({ tenantId, userId, planName, isAdmin }:
           : !(data?.recentContacts?.length)
             ? <div className="py-10 text-center"><p className="text-sm text-muted-foreground">No contacts yet</p><Link href="/tenant/contacts" className="text-sm text-violet-600 hover:underline mt-1 inline-block">Add your first contact →</Link></div>
             : <div className="divide-y divide-border">
-                {(data.recentContacts ?? []).map((c: any) => (
+                {(data.recentContacts ?? []).map((c) => (
                   <Link key={c.id} href={`/tenant/contacts/${c.id}`} className="flex items-center gap-3 px-5 py-3 hover:bg-accent/20 transition-colors">
                     <div className="w-9 h-9 rounded-full bg-gradient-to-br from-violet-500 to-indigo-500 flex items-center justify-center text-white text-sm font-bold shrink-0">
                       {c.first_name?.charAt(0)?.toUpperCase()}

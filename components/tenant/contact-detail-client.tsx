@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect, useRef, useCallback } from 'react';
+import type { ComponentType } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
@@ -42,13 +43,25 @@ const ACTIVITY_COLORS: Record<string,string> = {
   deal_update:'text-purple-600 bg-purple-100 dark:bg-purple-900/30',
   contact_created:'text-emerald-600 bg-emerald-100 dark:bg-emerald-900/30',
 };
-const ACTIVITY_ICONS: Record<string,any> = {
+const ACTIVITY_ICONS: Record<string, ComponentType<{ className?: string }>> = {
   note:MessageSquare, call:PhoneCall, email:AtSign, meeting:Calendar,
   task:CheckCircle, deal_update:Briefcase, contact_created:Star,
 };
 
 // ── QuickAdd: Task inline ──────────────────────────────────────
-function QuickAddTask({ contactId, contactName, teamMembers, onAdded }: any) {
+interface TeamMember {
+  user_id: string;
+  full_name: string;
+}
+
+interface QuickAddTaskProps {
+  contactId: string;
+  contactName: string;
+  teamMembers: TeamMember[];
+  onAdded: (task: unknown) => void;
+}
+
+function QuickAddTask({ contactId, contactName, teamMembers, onAdded }: QuickAddTaskProps) {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ title:'', priority:'medium', due_date:'', assigned_to:'' });
   const [saving, setSaving] = useState(false);
@@ -93,7 +106,18 @@ function QuickAddTask({ contactId, contactName, teamMembers, onAdded }: any) {
 }
 
 // ── QuickAdd: Deal inline ──────────────────────────────────────
-function QuickAddDeal({ contactId, companies, onAdded }: any) {
+interface Company {
+  id: string;
+  name: string;
+}
+
+interface QuickAddDealProps {
+  contactId: string;
+  companies: Company[];
+  onAdded: (deal: unknown) => void;
+}
+
+function QuickAddDeal({ contactId, companies, onAdded }: QuickAddDealProps) {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ title:'', value:'', stage:'lead', close_date:'' });
   const [saving, setSaving] = useState(false);
@@ -135,7 +159,12 @@ function QuickAddDeal({ contactId, companies, onAdded }: any) {
 }
 
 // ── QuickAdd: Meeting inline ───────────────────────────────────
-function QuickAddMeeting({ contactId, onAdded }: any) {
+interface QuickAddMeetingProps {
+  contactId: string;
+  onAdded: (meeting: unknown) => void;
+}
+
+function QuickAddMeeting({ contactId, onAdded }: QuickAddMeetingProps) {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ title:'', start_time:'', end_time:'', location:'', meeting_url:'' });
   const [saving, setSaving] = useState(false);
@@ -175,25 +204,138 @@ function QuickAddMeeting({ contactId, onAdded }: any) {
   );
 }
 
+interface Contact {
+  id: string;
+  first_name: string;
+  last_name: string;
+  email: string | null;
+  phone: string | null;
+  company_name?: string;
+  lead_status: string;
+  lead_source?: string;
+  assigned_to?: string;
+  tags?: string;
+  notes?: string;
+  company_id?: string | null;
+}
+
+interface Deal {
+  id: string;
+  title: string;
+  value: number;
+  stage: string;
+  stage_name?: string;
+  close_date?: string;
+  created_at: string;
+}
+
+interface Task {
+  id: string;
+  title: string;
+  completed: boolean;
+  due_date?: string;
+  priority: string;
+  assigned_to?: string;
+  created_at: string;
+}
+
+interface HistoryEntry {
+  id: string;
+  action: string;
+  entity_type: string;
+  created_at: string;
+  details?: Record<string, unknown>;
+}
+
+interface Company {
+  id: string;
+  name: string;
+}
+
+interface TeamMember {
+  user_id: string;
+  full_name: string;
+}
+
+interface Permissions {
+  canCreate: boolean;
+  canEdit: boolean;
+  canDelete: boolean;
+}
+
+interface Invoice {
+  id: string;
+  invoiceNumber: string;
+  title: string;
+  totalAmount: string;
+  status: string;
+  createdAt: string;
+}
+
+interface Order {
+  id: string;
+  orderNumber: string;
+  title: string;
+  totalAmount: string;
+  status: string;
+  createdAt: string;
+}
+
+interface Contract {
+  id: string;
+  contractNumber: string;
+  title: string;
+  totalValue: string;
+  status: string;
+  createdAt: string;
+}
+
+interface Subscription {
+  id: string;
+  name: string;
+  amount: string;
+  status: string;
+  createdAt: string;
+}
+
+interface Quote {
+  id: string;
+  quoteNumber: string;
+  title: string;
+  totalAmount: string;
+  status: string;
+  createdAt: string;
+}
+
 // ── Main Component ─────────────────────────────────────────────
 export default function ContactDetailClient({
   contact: initialContact, initialActivities, deals: initialDeals,
   tasks: initialTasks, companies, teamMembers, permissions, userId,
   invoices=[], orders=[], contracts=[], subscriptions=[], quotes=[],
 }: {
-  contact: any; initialActivities: any[]; deals: any[]; tasks: any[];
-  companies: any[]; teamMembers: any[]; permissions: any; userId: string;
-  invoices?: any[]; orders?: any[]; contracts?: any[]; subscriptions?: any[]; quotes?: any[];
+  contact: Contact;
+  initialActivities: unknown[];
+  deals: Deal[];
+  tasks: Task[];
+  companies: Company[];
+  teamMembers: TeamMember[];
+  permissions: Permissions;
+  userId: string;
+  invoices?: Invoice[];
+  orders?: Order[];
+  contracts?: Contract[];
+  subscriptions?: Subscription[];
+  quotes?: Quote[];
 }) {
   const [contact, setContact]       = useState(initialContact);
   const [activities, setActivities] = useState(initialActivities);
   const [deals, setDeals]           = useState(initialDeals);
   const [tasks, setTasks]           = useState(initialTasks);
   const [activeTab, setActiveTab]   = useState('activity'); // 'activity' | 'tasks' | 'deals' | 'history' | 'billing'
-  const [history, setHistory]           = useState<any[]>([]);
+  const [history, setHistory]           = useState<HistoryEntry[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [editing, setEditing]       = useState(false);
-  const [editForm, setEditForm]     = useState({ ...initialContact });
+  const [editForm, setEditForm]     = useState<Partial<Contact>>({ ...initialContact });
   const [noteText, setNoteText]     = useState('');
   const [noteType, setNoteType]     = useState('note');
   const [addingNote, setAddingNote] = useState(false);
@@ -258,7 +400,7 @@ export default function ContactDetailClient({
     });
     const data = await res.json();
     if (!res.ok) { toast.error(data.error); return; }
-    setContact((c: any) => ({ ...c, lead_status: newStatus }));
+    setContact((c) => ({ ...c, lead_status: newStatus }));
     const desc = `Status changed: ${contact.lead_status} → ${newStatus}${statusReason ? ` — ${statusReason}` : ''}`;
     setActivities(prev => [{
       id: `tmp_${Date.now()}`, type:'note', description: desc,
@@ -406,14 +548,14 @@ export default function ContactDetailClient({
                 <label className="block text-[10px] font-medium text-muted-foreground mb-0.5">Company</label>
                 <select value={editForm.company_id||''} onChange={e => setEditForm((p: any) => ({...p, company_id: e.target.value||null}))} className={inp}>
                   <option value="">No company</option>
-                  {companies.map((c:any) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  {companies.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
                 </select>
               </div>
               <div>
                 <label className="block text-[10px] font-medium text-muted-foreground mb-0.5">Assigned To</label>
                 <select value={editForm.assigned_to||''} onChange={e => setEditForm((p: any) => ({...p, assigned_to: e.target.value||null}))} className={inp}>
                   <option value="">Unassigned</option>
-                  {teamMembers.map((m:any) => <option key={m.user_id} value={m.user_id}>{m.full_name}</option>)}
+            {teamMembers.map((m) => <option key={m.user_id} value={m.user_id}>{m.full_name}</option>)}
                 </select>
               </div>
               <div>
@@ -455,10 +597,10 @@ export default function ContactDetailClient({
           {/* Quick actions */}
           <div className="admin-card p-4 space-y-1">
             <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">Quick Add</p>
-            <QuickAddTask contactId={contact.id} contactName={`${contact.first_name} ${contact.last_name}`} teamMembers={teamMembers} onAdded={(t:any) => setTasks(prev => [t, ...prev])} />
-            <QuickAddDeal contactId={contact.id} companies={companies} onAdded={(d:any) => setDeals(prev => [d, ...prev])} />
-            <QuickAddMeeting contactId={contact.id} onAdded={(m:any) => {
-              setActivities(prev => [{ id:`tmp_${Date.now()}`, type:'meeting', description:`Meeting scheduled: ${m.title}`, created_at:new Date().toISOString(), full_name:'You' }, ...prev]);
+            <QuickAddTask contactId={contact.id} contactName={`${contact.first_name} ${contact.last_name}`} teamMembers={teamMembers} onAdded={(t) => setTasks(prev => [t as Task, ...prev])} />
+            <QuickAddDeal contactId={contact.id} companies={companies} onAdded={(d) => setDeals(prev => [d as Deal, ...prev])} />
+            <QuickAddMeeting contactId={contact.id} onAdded={(m) => {
+              setActivities(prev => [{ id:`tmp_${Date.now()}`, type:'meeting', description:`Meeting scheduled: ${(m as { title: string }).title}`, created_at:new Date().toISOString(), full_name:'You' }, ...prev]);
             }} />
           </div>
         </div>
@@ -598,7 +740,7 @@ export default function ContactDetailClient({
                     if (!a.due_date) return 1;
                     if (!b.due_date) return -1;
                     return new Date(a.due_date).getTime() - new Date(b.due_date).getTime();
-                  }).map((t: any) => {
+                  }).map((t) => {
                     const today = new Date().toISOString().split('T')[0] || '';
                     const overdue = !t.completed && t.due_date && t.due_date < today;
                     return (
@@ -639,13 +781,13 @@ export default function ContactDetailClient({
             <div className="admin-card overflow-hidden">
               <div className="px-5 py-3 border-b border-border flex items-center justify-between">
                 <p className="text-sm font-semibold">Deals</p>
-                <QuickAddDeal contactId={contact.id} companies={companies} onAdded={(d:any) => setDeals(prev => [d, ...prev])} />
+                <QuickAddDeal contactId={contact.id} companies={companies} onAdded={(d) => setDeals(prev => [d as Deal, ...prev])} />
               </div>
               {!deals.length ? (
                 <div className="px-5 py-10 text-center text-sm text-muted-foreground">No deals yet — create one above</div>
               ) : (
                 <div className="divide-y divide-border">
-                  {deals.map((d: any) => (
+                  {deals.map((d) => (
                     <div key={d.id} className="flex items-center gap-4 px-5 py-4 hover:bg-accent/20 transition-colors">
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-semibold">{d.title}</p>
@@ -662,7 +804,7 @@ export default function ContactDetailClient({
                   ))}
                   <div className="px-5 py-3 bg-muted/20 flex items-center justify-between">
                     <span className="text-xs font-semibold text-muted-foreground">Total pipeline</span>
-                    <span className="text-sm font-bold">{formatCurrency(deals.filter((d:any)=>!['lost'].includes(d.stage)).reduce((s:number,d:any)=>s+Number(d.value),0))}</span>
+                    <span className="text-sm font-bold">{formatCurrency(deals.filter((d)=>!['lost'].includes(d.stage)).reduce((s:number,d)=>s+Number(d.value),0))}</span>
                   </div>
                 </div>
               )}
@@ -682,7 +824,7 @@ export default function ContactDetailClient({
                 <div className="px-5 py-10 text-center text-sm text-muted-foreground">No edit history yet</div>
               ) : (
                 <div className="divide-y divide-border max-h-[500px] overflow-y-auto">
-                  {history.map((h: any) => (
+                  {history.map((h) => (
                     <div key={h.id} className="px-5 py-4 hover:bg-accent/10 transition-colors">
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex-1 min-w-0">
@@ -750,14 +892,14 @@ export default function ContactDetailClient({
 
                 {/* Build unified timeline */}
                 {(() => {
-                  type BillingItem = { type: string; item: any; date: Date; label: string; amount: number; status: string; number: string; };
+                  type BillingItem = { type: string; item: Invoice | Order | Contract | Subscription | Quote; date: Date; label: string; amount: number; status: string; number: string; };
                   const items: BillingItem[] = [];
 
-                  invoices.forEach((i: any) => items.push({ type: 'invoice', item: i, date: new Date(i.createdAt), label: i.title || i.invoiceNumber, amount: parseFloat(i.totalAmount || 0), status: i.status, number: i.invoiceNumber || '' }));
-                  orders.forEach((o: any) => items.push({ type: 'order', item: o, date: new Date(o.createdAt), label: o.title || o.orderNumber, amount: parseFloat(o.totalAmount || 0), status: o.status, number: o.orderNumber || '' }));
-                  contracts.forEach((c: any) => items.push({ type: 'contract', item: c, date: new Date(c.createdAt), label: c.title, amount: parseFloat(c.totalValue || 0), status: c.status, number: c.contractNumber || '' }));
-                  subscriptions.forEach((s: any) => items.push({ type: 'subscription', item: s, date: new Date(s.createdAt), label: s.name, amount: parseFloat(s.amount || 0), status: s.status, number: '' }));
-                  quotes.forEach((q: any) => items.push({ type: 'quote', item: q, date: new Date(q.createdAt), label: q.title, amount: parseFloat(q.totalAmount || 0), status: q.status, number: q.quoteNumber || '' }));
+                  invoices.forEach((i) => items.push({ type: 'invoice', item: i, date: new Date(i.createdAt), label: i.title || i.invoiceNumber, amount: parseFloat(i.totalAmount || '0'), status: i.status, number: i.invoiceNumber || '' }));
+                  orders.forEach((o) => items.push({ type: 'order', item: o, date: new Date(o.createdAt), label: o.title || o.orderNumber, amount: parseFloat(o.totalAmount || '0'), status: o.status, number: o.orderNumber || '' }));
+                  contracts.forEach((c) => items.push({ type: 'contract', item: c, date: new Date(c.createdAt), label: c.title, amount: parseFloat(c.totalValue || '0'), status: c.status, number: c.contractNumber || '' }));
+                  subscriptions.forEach((s) => items.push({ type: 'subscription', item: s, date: new Date(s.createdAt), label: s.name, amount: parseFloat(s.amount || '0'), status: s.status, number: '' }));
+                  quotes.forEach((q) => items.push({ type: 'quote', item: q, date: new Date(q.createdAt), label: q.title, amount: parseFloat(q.totalAmount || '0'), status: q.status, number: q.quoteNumber || '' }));
 
                   items.sort((a, b) => b.date.getTime() - a.date.getTime());
 

@@ -32,7 +32,8 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ data: pipelinesWithStages });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    console.error('[API]', err);
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }
 
@@ -79,6 +80,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ data: result }, { status: 201 });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    console.error('[API]', err);
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }

@@ -21,7 +21,37 @@ import {
 import ImportModal from '@/components/tenant/import-modal';
 import toast from 'react-hot-toast';
 
-// ── Pipeline Configuration ──────────────────────────────────────
+interface Lead {
+  id: string;
+  first_name: string;
+  last_name: string;
+  email?: string;
+  phone?: string;
+  company_name?: string;
+  lead_status: string;
+  assigned_to?: string;
+  created_at: string;
+}
+
+interface Company {
+  id: string;
+  name: string;
+}
+
+interface TeamMember {
+  user_id: string;
+  full_name: string;
+}
+
+interface Props {
+  initialLeads: Lead[];
+  companies: Company[];
+  teamMembers: TeamMember[];
+  permissions: Record<string, boolean>;
+  totalCount: number;
+  tenantId: string;
+  userId: string;
+}
 const PIPELINE_CONFIG = {
   new: {
     label: 'New',
@@ -66,16 +96,6 @@ const PIPELINE_CONFIG = {
     description: 'Opportunity lost',
   },
 };
-
-interface Props {
-  initialLeads: any[];
-  companies: any[];
-  teamMembers: any[];
-  permissions: Record<string, boolean>;
-  totalCount: number;
-  tenantId: string;
-  userId: string;
-}
 
 export default function LeadsClient({
   initialLeads,
@@ -397,7 +417,7 @@ export default function LeadsClient({
                 className="w-full px-3 py-2 rounded-lg border border-border bg-card"
               >
                 <option value="">Select company (optional)</option>
-                {companies.map((c: any) => (
+                {companies.map((c) => (
                   <option key={c.id} value={c.id}>
                     {c.name}
                   </option>

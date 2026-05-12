@@ -5,6 +5,58 @@ import Link from 'next/link';
 import { Search, Users, TrendingUp, Building2, CheckSquare, Loader2, X, Target } from 'lucide-react';
 import { cn, formatCurrency, formatDate } from '@/lib/utils';
 
+interface Contact {
+  id: string;
+  first_name: string;
+  last_name: string;
+  email?: string;
+  company_name?: string;
+  lead_status: string;
+}
+
+interface Lead {
+  id: string;
+  first_name: string;
+  last_name: string;
+  email?: string;
+  company_name?: string;
+  lead_status: string;
+}
+
+interface Deal {
+  id: string;
+  title: string;
+  value: number;
+  stage: string;
+  first_name?: string;
+  last_name?: string;
+}
+
+interface Company {
+  id: string;
+  name: string;
+  industry?: string;
+  contact_count: number;
+}
+
+interface Task {
+  id: string;
+  title: string;
+  completed: boolean;
+  due_date?: string;
+  priority: string;
+  first_name?: string;
+  last_name?: string;
+}
+
+interface SearchResults {
+  contacts: Contact[];
+  leads: Lead[];
+  deals: Deal[];
+  companies: Company[];
+  tasks: Task[];
+}
+
 const STATUS_COLORS: Record<string,string> = {
   new:'bg-slate-100 text-slate-600', contacted:'bg-blue-100 text-blue-700',
   qualified:'bg-violet-100 text-violet-700', converted:'bg-emerald-100 text-emerald-700',
@@ -31,7 +83,7 @@ export default function SearchPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [query, setQuery] = useState(searchParams.get('q') ?? '');
-  const [results, setResults] = useState<any>(null);
+  const [results, setResults] = useState<SearchResults | null>(null);
   const [loading, setLoading] = useState(false);
   const [activeType, setActiveType] = useState('all');
   const inputRef = useRef<HTMLInputElement>(null);
@@ -145,7 +197,7 @@ export default function SearchPage() {
                 <span className="text-xs text-muted-foreground">({results.contacts.length})</span>
               </div>
               <div className="admin-card divide-y divide-border overflow-hidden">
-                {results.contacts.map((c: any) => (
+                {results.contacts.map((c) => (
                   <Link key={c.id} href={`/tenant/contacts/${c.id}`}
                     className="flex items-center gap-3 px-4 py-3 hover:bg-accent/30 transition-colors">
                     <div className="w-9 h-9 rounded-full bg-gradient-to-br from-violet-500 to-indigo-500 flex items-center justify-center text-white text-sm font-bold shrink-0">
@@ -178,7 +230,7 @@ export default function SearchPage() {
                 <span className="text-xs text-muted-foreground">({results.leads.length})</span>
               </div>
               <div className="admin-card divide-y divide-border overflow-hidden">
-                {results.leads.map((l: any) => (
+                {results.leads.map((l) => (
                   <Link key={l.id} href={`/tenant/leads/${l.id}`}
                     className="flex items-center gap-3 px-4 py-3 hover:bg-accent/30 transition-colors">
                     <div className="w-9 h-9 rounded-xl bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center text-violet-600 text-sm font-bold shrink-0">
@@ -211,7 +263,7 @@ export default function SearchPage() {
                 <span className="text-xs text-muted-foreground">({results.deals.length})</span>
               </div>
               <div className="admin-card divide-y divide-border overflow-hidden">
-                {results.deals.map((d: any) => (
+                {results.deals.map((d) => (
                   <Link key={d.id} href="/tenant/deals"
                     className="flex items-center gap-3 px-4 py-3 hover:bg-accent/30 transition-colors">
                     <div className="w-9 h-9 rounded-xl bg-amber-100 dark:bg-amber-900/20 flex items-center justify-center shrink-0">
@@ -242,7 +294,7 @@ export default function SearchPage() {
                 <span className="text-xs text-muted-foreground">({results.companies.length})</span>
               </div>
               <div className="admin-card divide-y divide-border overflow-hidden">
-                {results.companies.map((c: any) => (
+                {results.companies.map((c) => (
                   <Link key={c.id} href={`/tenant/companies/${c.id}`}
                     className="flex items-center gap-3 px-4 py-3 hover:bg-accent/30 transition-colors">
                     <div className="w-9 h-9 rounded-xl bg-blue-100 dark:bg-blue-900/20 flex items-center justify-center text-blue-600 font-bold text-sm shrink-0">
@@ -268,7 +320,7 @@ export default function SearchPage() {
                 <span className="text-xs text-muted-foreground">({results.tasks.length})</span>
               </div>
               <div className="admin-card divide-y divide-border overflow-hidden">
-                {results.tasks.map((t: any) => {
+                {results.tasks.map((t) => {
                   const overdue = !t.completed && t.due_date && t.due_date < (new Date().toISOString().split('T')[0] ?? '');
                   return (
                     <Link key={t.id} href="/tenant/tasks"

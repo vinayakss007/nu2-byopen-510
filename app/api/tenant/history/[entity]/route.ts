@@ -50,6 +50,6 @@ export async function GET(
     return NextResponse.json({ data: history });
   } catch (err: any) {
     console.error('[history GET]', err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }

@@ -62,7 +62,7 @@ export async function GET(req: NextRequest) {
             entityType: 'contact',
             entityId: row.contactId,
             action: 'email_click'
-          }).catch(() => {});
+          }).catch((e: any) => console.error('[track.click] Operation failed:', e.message));
         }
       } catch (err) { 
         console.error('[TrackClick] Error:', err);

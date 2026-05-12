@@ -87,7 +87,8 @@ export async function POST(req: NextRequest) {
       note: 'Scan QR or enter secret in authenticator app, then POST to /api/auth/2fa/verify with a token to activate.' 
     });
   } catch (err: any) { 
-    return NextResponse.json({ error: err.message }, { status: 500 }); 
+    console.error('[API]', err);
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 }); 
   }
 }
 

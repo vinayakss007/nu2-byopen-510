@@ -4,6 +4,8 @@ import { useRouter } from 'next/navigation';
 import { Zap, Eye, EyeOff, Loader2, CheckCircle, Shield } from 'lucide-react';
 import toast from 'react-hot-toast';
 
+const hasSpecial = (s: string) => /[!@#$%^&*(),.?":{}|<>]/.test(s);
+
 export default function SetupClient() {
   const [form, setForm] = useState({ full_name: '', email: '', password: '', confirm: '', workspace_name: '', setup_key: '' });
   const [showPass, setShowPass] = useState(false);
@@ -19,7 +21,7 @@ export default function SetupClient() {
     if (form.password.length < 12) { toast.error('Password must be at least 12 characters'); return; }
     if (!/[A-Z]/.test(form.password)) { toast.error('Password must contain at least one uppercase letter'); return; }
     if (!/[0-9]/.test(form.password)) { toast.error('Password must contain at least one number'); return; }
-    if (!/[!@#$%^&*(),.?":{}|<>]/.test(form.password)) { toast.error('Password must contain at least one special character'); return; }
+    if (!hasSpecial(form.password)) { toast.error('Password must contain at least one special character'); return; }
     setLoading(true);
     const res = await fetch('/api/setup/create-admin', {
       method: 'POST',
@@ -76,7 +78,7 @@ export default function SetupClient() {
             </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-4">
             <div>
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">Admin Account</p>
               <div className="space-y-3">
@@ -121,12 +123,12 @@ export default function SetupClient() {
               <p className="text-xs text-muted-foreground mt-1">Set in <code className="font-mono">.env.local</code> as <code className="font-mono">SETUP_KEY</code></p>
             </div>
 
-            <button type="submit" disabled={loading}
+            <button onClick={handleSubmit} disabled={loading}
               className="w-full py-3 bg-gradient-to-r from-violet-600 to-indigo-600 text-white rounded-xl text-sm font-semibold hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-violet-500/25 transition-all">
               {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-              {loading ? 'Creating admin account...' : 'Create Admin Account & Launch'}
+              {loading ? 'Creating admin account...' : 'Create Admin Account and Launch'}
             </button>
-          </form>
+          </div>
         </div>
 
         <p className="text-center text-xs text-muted-foreground mt-4">

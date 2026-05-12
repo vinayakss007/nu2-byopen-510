@@ -51,6 +51,7 @@ export async function PATCH(request: NextRequest) {
 
     return NextResponse.json({ ok: true });
   } catch (err: any) { 
-    return NextResponse.json({ error: err.message }, { status: 500 }); 
+    console.error('[API]', err);
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 }); 
   }
 }

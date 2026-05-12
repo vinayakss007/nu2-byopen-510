@@ -24,6 +24,13 @@ const DEFAULT_CONFIG: BruteForceConfig = {
   blockMinutes: 30,
 };
 
+function getBlockMinutes(attemptsCount: number): number {
+  if (attemptsCount >= 15) return 1440;
+  if (attemptsCount >= 10) return 480;
+  if (attemptsCount >= 5) return 120;
+  return 30;
+}
+
 /**
  * Check if an IP or email is blocked
  */
@@ -55,7 +62,7 @@ export async function isBlocked(
     return { blocked: false };
   } catch (err) {
     devLogger.error(err as Error, '[brute-force] isBlocked check failed');
-    return { blocked: false }; // Fail open - don't block legitimate users
+    return { blocked: true, blockedUntil: new Date(Date.now() + 5 * 60 * 1000), reason: 'Security check unavailable. Please try again later.' };
   }
 }
 
@@ -101,16 +108,18 @@ export async function recordFailedAttempt(
     
     const emailCount = (emailResult as any)?.count || 0;
 
-    // Block IP if too many attempts
+    // Block IP if too many attempts (with progressive backoff)
     if (ipCount >= config.maxAttempts) {
-      await blockIdentifier(ipAddress, 'ip', config.blockMinutes, `Too many failed login attempts (${ipCount}) from this IP`);
-      logger.warn('IP blocked due to brute force', { ip: ipAddress, attempts: ipCount });
+      const blockMins = getBlockMinutes(ipCount);
+      await blockIdentifier(ipAddress, 'ip', blockMins, `Too many failed login attempts (${ipCount}) from this IP`);
+      logger.warn('IP blocked due to brute force', { ip: ipAddress, attempts: ipCount, blockMinutes: blockMins });
     }
 
-    // Block email if too many attempts
+    // Block email if too many attempts (with progressive backoff)
     if (emailCount >= config.maxAttempts) {
-      await blockIdentifier(email.toLowerCase(), 'email', config.blockMinutes, `Too many failed login attempts (${emailCount}) for this email`);
-      logger.warn('Email blocked due to brute force', { email, attempts: emailCount });
+      const blockMins = getBlockMinutes(emailCount);
+      await blockIdentifier(email.toLowerCase(), 'email', blockMins, `Too many failed login attempts (${emailCount}) for this email`);
+      logger.warn('Email blocked due to brute force', { email, attempts: emailCount, blockMinutes: blockMins });
     }
   } catch (err) {
     devLogger.error(err as Error, '[brute-force] recordFailedAttempt failed');
@@ -130,6 +139,13 @@ export async function recordSuccessfulLogin(
     await db.execute(sql`
       INSERT INTO login_attempts (email, ip_address, user_agent, success, attempted_at)
       VALUES (${email.toLowerCase()}, ${ipAddress}, ${userAgent || null}, true, NOW())
+    `);
+    // Clear failed attempt block on successful login
+    await db.execute(sql`
+      DELETE FROM login_blocks WHERE identifier = ${email.toLowerCase()} AND identifier_type = 'email'
+    `);
+    await db.execute(sql`
+      DELETE FROM login_blocks WHERE identifier = ${ipAddress} AND identifier_type = 'ip'
     `);
   } catch (err) {
     devLogger.error(err as Error, '[brute-force] recordSuccessfulLogin failed');

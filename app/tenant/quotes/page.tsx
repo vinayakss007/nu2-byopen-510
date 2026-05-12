@@ -4,7 +4,19 @@ import { useSearchParams } from 'next/navigation';
 import { Plus, Search, FileText, X, Send, Clock, CheckCircle, XCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-interface Contact { id: string; firstName: string; lastName: string; email: string | null; }
+interface Contact {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string | null;
+}
+
+interface QuoteItem {
+  description: string;
+  quantity: string;
+  unitPrice: string;
+}
+
 interface Quote {
   id: string;
   quoteNumber: string | null;
@@ -15,6 +27,18 @@ interface Quote {
   contactId: string | null;
   expiresAt: string | null;
   createdAt: string;
+}
+
+interface QuoteForm {
+  title: string;
+  contactId: string;
+  dealId: string;
+  expiresAt: string;
+  notes: string;
+  terms: string;
+  items: QuoteItem[];
+  discount: string;
+  tax: string;
 }
 
 const statusColors: Record<string, string> = {
@@ -44,7 +68,11 @@ function QuotesPageInner() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [showModal, setShowModal] = useState(false);
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<QuoteForm>(emptyForm);
+
+  const [contactFilter, setContactFilter] = useState(initialContactId);
+
+  const emptyForm: QuoteForm = {
     title: '',
     contactId: initialContactId,
     dealId: '',
@@ -54,9 +82,7 @@ function QuotesPageInner() {
     items: [{ description: '', quantity: '1', unitPrice: '0' }],
     discount: '0',
     tax: '0',
-  });
-
-  const [contactFilter, setContactFilter] = useState(initialContactId);
+  };
 
   useEffect(() => { fetchQuotes(); fetchContacts(); }, []);
 
@@ -91,7 +117,7 @@ function QuotesPageInner() {
       if (!res.ok) throw new Error('Failed to create quote');
       toast.success('Quote created successfully');
       setShowModal(false);
-      setForm({ title: '', contactId: '', dealId: '', expiresAt: '', notes: '', terms: '', items: [{ description: '', quantity: '1', unitPrice: '0' }], discount: '0', tax: '0' });
+      setForm(emptyForm);
       fetchQuotes();
     } catch (error) {
       toast.error('Failed to create quote');

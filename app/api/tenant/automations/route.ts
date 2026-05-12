@@ -48,7 +48,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ data });
   } catch (err: any) {
     console.error('[automations GET]', err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }
 
@@ -87,6 +87,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ data: newAutomation }, { status: 201 });
   } catch (err: any) {
     console.error('[automations POST]', err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }

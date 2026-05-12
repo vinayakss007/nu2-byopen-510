@@ -27,10 +27,11 @@ export async function POST(req: NextRequest) {
       body: new URLSearchParams({ customer: tenant.stripeCustomerId, return_url: `${appUrl}/tenant/settings/billing` }).toString(),
     });
     const session = await res.json() as any;
-    if (!res.ok) return NextResponse.json({ error: session.error?.message ?? 'Stripe error' }, { status:400 });
+    if (!res.ok) return NextResponse.json({ error: 'An unexpected error occurred', { status:400 });
     
     return NextResponse.json({ url: session.url });
   } catch (err: any) { 
-    return NextResponse.json({ error: err.message }, { status:500 }); 
+    console.error('[API]', err);
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status:500 }); 
   }
 }

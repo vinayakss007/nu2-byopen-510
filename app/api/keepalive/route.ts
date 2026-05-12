@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
     console.error('[KeepAlive] Error:', err);
     return NextResponse.json({
       ok: false,
-      error: err.message,
+      error: 'An unexpected error occurred',
     }, { status: 500 });
   }
 }

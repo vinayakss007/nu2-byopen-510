@@ -57,7 +57,8 @@ export async function GET(req: NextRequest) {
       .orderBy(desc(fileAttachments.createdAt));
 
     return NextResponse.json({ data: files });
-  } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
+  } catch (err: any) { console.error('[API]', err);
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 }); }
 }
 
 export async function POST(req: NextRequest) {
@@ -143,7 +144,8 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json({ data: attachment }, { status: 201 });
-  } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
+  } catch (err: any) { console.error('[API]', err);
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 }); }
 }
 
 export async function DELETE(req: NextRequest) {
@@ -171,5 +173,6 @@ export async function DELETE(req: NextRequest) {
 
     await logAudit({ tenantId: ctx.tenantId, userId: ctx.userId, action:'delete', resourceType:'file', resourceId: id });
     return NextResponse.json({ ok: true });
-  } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
+  } catch (err: any) { console.error('[API]', err);
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 }); }
 }

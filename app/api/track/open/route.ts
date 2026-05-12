@@ -56,7 +56,7 @@ export async function GET(req: NextRequest) {
             entityType: 'contact',
             entityId: row.contactId,
             action: 'email_open'
-          }).catch(() => {});
+          }).catch((e: any) => console.error('[track.open] Operation failed:', e.message));
         }
       } catch (err) { 
         console.error('[TrackOpen] Error:', err);

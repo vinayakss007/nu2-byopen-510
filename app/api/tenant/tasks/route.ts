@@ -63,7 +63,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ data, total: countRes?.count ?? 0 });
   } catch (err: any) {
     console.error('[tasks GET]', err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }
 
@@ -140,6 +140,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ data: newTask }, { status: 201 });
   } catch (err: any) {
     console.error('[tasks POST]', err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }

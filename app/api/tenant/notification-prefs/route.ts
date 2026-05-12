@@ -19,7 +19,8 @@ export async function GET(req: NextRequest) {
     });
 
     return NextResponse.json({ data: row?.notificationPrefs ?? {} });
-  } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
+  } catch (err: any) { console.error('[API]', err);
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 }); }
 }
 
 export async function PATCH(req: NextRequest) {
@@ -44,5 +45,6 @@ export async function PATCH(req: NextRequest) {
       ));
 
     return NextResponse.json({ ok: true, data: safe });
-  } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
+  } catch (err: any) { console.error('[API]', err);
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 }); }
 }

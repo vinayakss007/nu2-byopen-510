@@ -1,4 +1,5 @@
 'use client';
+import type { ComponentType } from 'react';
 import { useState, useEffect } from 'react';
 import { BarChart3, TrendingUp, Users, CheckSquare, DollarSign, Target, RefreshCw } from 'lucide-react';
 import {
@@ -7,6 +8,54 @@ import {
 } from 'recharts';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import { cn } from '@/lib/utils';
+
+interface Deal {
+  id: string;
+  title: string;
+  amount?: number;
+  value?: number;
+  stageId: string;
+  stage_name?: string;
+  created_at: string;
+}
+
+interface Contact {
+  id: string;
+  first_name: string;
+  last_name: string;
+  lead_source?: string;
+  lead_status?: string;
+  created_at: string;
+}
+
+interface Task {
+  id: string;
+  title: string;
+  completed: boolean;
+  due_date?: string;
+  created_at: string;
+}
+
+interface Pipeline {
+  id: string;
+  name: string;
+  stages: Stage[];
+}
+
+interface Stage {
+  id: string;
+  name: string;
+  order: number;
+}
+
+interface KPIMetric {
+  label: string;
+  value: string;
+  sub: string;
+  icon: ComponentType<{ className?: string }>;
+  color: string;
+  bg: string;
+}
 
 const STAGE_COLORS: Record<string,string> = {
   'Lead': '#94a3b8', 'Qualified': '#3b82f6', 'Proposal': '#8b5cf6',
@@ -19,10 +68,10 @@ const TICK_STYLE  = { fontSize:10, fill:'hsl(var(--muted-foreground))' };
 const TIP_STYLE   = { background:'hsl(var(--card))', border:'1px solid hsl(var(--border))', borderRadius:8, fontSize:12 };
 
 export default function TenantAnalyticsPage() {
-  const [deals, setDeals]       = useState<any[]>([]);
-  const [contacts, setContacts] = useState<any[]>([]);
-  const [tasks, setTasks]       = useState<any[]>([]);
-  const [stages, setStages]     = useState<any[]>([]);
+  const [deals, setDeals]       = useState<Deal[]>([]);
+  const [contacts, setContacts] = useState<Contact[]>([]);
+  const [tasks, setTasks]       = useState<Task[]>([]);
+  const [stages, setStages]     = useState<Stage[]>([]);
   const [loading, setLoading]   = useState(true);
   const [range, setRange]       = useState(30);
 
@@ -36,15 +85,14 @@ export default function TenantAnalyticsPage() {
       setDeals(d.data||[]); 
       setContacts(c.data||[]); 
       setTasks(t.data||[]); 
-      // Flatten stages from all pipelines
-      const allStages = (p.data||[]).flatMap((pl: any) => (pl.stages||[]));
+      const allStages = (p.data||[]).flatMap((pl: Pipeline) => (pl.stages||[]));
       setStages(allStages);
       setLoading(false);
     });
   }, []);
 
   const since = new Date(Date.now() - range * 86400000);
-  const inRange = (d: any) => new Date(d.created_at) >= since;
+  const inRange = (d: Deal) => new Date(d.created_at) >= since;
 
   // Get stage name from stageId
   const getStageName = (stageId: string): string => {

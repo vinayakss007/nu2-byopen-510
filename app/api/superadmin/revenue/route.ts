@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ mrr: mrrRes, events });
   } catch (err: any) {
     console.error('[superadmin/revenue GET]', err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }
 

@@ -22,6 +22,6 @@ export async function DELETE(request: NextRequest, { params }: any) {
     return NextResponse.json({ ok: true });
   } catch (err: any) {
     console.error('[Invitation] DELETE error:', err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }

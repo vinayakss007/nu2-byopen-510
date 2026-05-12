@@ -54,7 +54,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     return NextResponse.json({ data: legacyRow });
   } catch (err: any) {
     console.error('[deals [id] GET]', err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }
 
@@ -174,7 +174,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     return NextResponse.json({ data: row });
   } catch (err: any) {
     console.error('[deals [id] PATCH]', err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }
 
@@ -216,7 +216,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     return NextResponse.json({ ok: true, message: 'Moved to trash. Restore within 30 days.' });
   } catch (err: any) {
     console.error('[deals [id] DELETE]', err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }
 
@@ -227,7 +227,7 @@ async function handleDealWon(ctx: any, dealId: string, row: any) {
     title: row.title,
     amount: row.amount,
     contact_id: row.contactId,
-  }).catch(() => {});
+  }).catch((e: any) => console.error('[tenant.deals.[id]] Operation failed:', e.message));
 
   // Send Email
   if (row.contactId) {
@@ -261,7 +261,7 @@ async function handleDealWon(ctx: any, dealId: string, row: any) {
             <br/>
             <p>Best regards,<br/>${contactData.tenantName} Team</p>
           </div>`,
-        }).catch(() => {});
+        }).catch((e: any) => console.error('[tenant.deals.[id]] Operation failed:', e.message));
       }
     } catch (e) {
       console.error('[deal-won] Email failed:', e);

@@ -14,6 +14,18 @@ function SignupForm() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
+  const hasSpecial = (s: string) => /[!@#$%^&*(),.?":{}|<>]/.test(s);
+  const isValidPassword = (p: string) => p.length >= 12 && /[A-Z]/.test(p) && /[0-9]/.test(p) && hasSpecial(p);
+
+  const handleNext = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!isValidPassword(password)) {
+      toast.error('Password must be 12+ chars with uppercase, number & special char');
+      return;
+    }
+    setStep('workspace');
+  };
+
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -55,7 +67,7 @@ function SignupForm() {
           {step==='account'?(
             <>
               <h1 className="text-xl font-bold mb-5">Create your account</h1>
-              <form onSubmit={e=>{e.preventDefault();if(password.length<12||!/[A-Z]/.test(password)||!/[0-9]/.test(password)||!/[!@#$%^&*(),.?":{}|<>]/.test(password)){toast.error('Password must be 12+ chars with uppercase, number & special char');return;}setStep('workspace');}} className="space-y-4">
+              <form onSubmit={handleNext} className="space-y-4">
                 <div><label className="block text-sm font-medium mb-1.5">Full Name</label><input value={name} onChange={e=>setName(e.target.value)} required placeholder="Jane Smith" className={inp}/></div>
                 <div><label className="block text-sm font-medium mb-1.5">Email</label><input type="email" value={email} onChange={e=>setEmail(e.target.value)} required placeholder="jane@company.com" className={inp}/></div>
                 <div><label className="block text-sm font-medium mb-1.5">Password</label><input type="password" value={password} onChange={e=>setPassword(e.target.value)} required minLength={12} placeholder="12+ chars, uppercase, number, special" className={inp}/></div>

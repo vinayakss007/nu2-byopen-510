@@ -92,7 +92,7 @@ export async function POST(req: NextRequest) {
 
     if (!response.ok) {
       return NextResponse.json(
-        { error: responseData.error?.message || 'Failed to send WhatsApp message' },
+        { error: 'An unexpected error occurred' || 'Failed to send WhatsApp message' },
         { status: 400 }
       );
     }
@@ -174,6 +174,6 @@ export async function POST(req: NextRequest) {
     }, { status: 201 });
   } catch (err: any) {
     console.error('[WhatsApp Send] Error:', err.message);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }

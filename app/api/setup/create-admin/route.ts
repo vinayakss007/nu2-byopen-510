@@ -138,12 +138,7 @@ export async function POST(request: NextRequest) {
           'deals.view': true, 'deals.create': true, 'deals.edit': true,
           'tasks.view': true, 'tasks.create': true, 'tasks.manage': true,
         },
-      }).onConflictDoNothing();
-
-      // 4. Activate Core Modules
-      await ModuleRegistry.install(t.id, 'core-crm', u.id);
-      await ModuleRegistry.install(t.id, 'automation-basic', u.id);
-      await ModuleRegistry.install(t.id, 'service-helpdesk', u.id);
+      }).onConflictDoNothing({ target: [roles.tenantId, roles.slug] });
 
       // 7. Initialize onboarding progress
       await tx.insert(onboardingProgress).values({
@@ -152,7 +147,7 @@ export async function POST(request: NextRequest) {
         stepName: 'admin_created',
         isCompleted: true,
         completedAt: new Date(),
-      }).onConflictDoNothing().catch(() => {});
+      }).onConflictDoNothing({ target: [onboardingProgress.tenantId, onboardingProgress.userId, onboardingProgress.stepName] }).catch((err: any) => console.error('[setup] Onboarding progress conflict:', err.message));
 
       // 8. Create session
       const token = await createToken(u.id);
@@ -166,7 +161,13 @@ export async function POST(request: NextRequest) {
       return { u, t, token };
     });
 
+    // Install modules after tenant is committed to avoid FK issues
     const { u: user, t: tenant, token } = result;
+    const coreModules = ['core-crm', 'automation-basic', 'service-helpdesk'];
+    for (const modId of coreModules) {
+      const r = await ModuleRegistry.install(tenant.id, modId, user.id);
+      if (!r.ok) console.error(`[setup] Failed to install module ${modId}:`, r.error);
+    }
     await setSessionCookie(token);
 
     return NextResponse.json({
@@ -176,6 +177,6 @@ export async function POST(request: NextRequest) {
     }, { status: 201 });
   } catch (err: any) {
     console.error('[setup/create-admin]', err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: 'Setup failed. Please try again.' }, { status: 500 });
   }
 }

@@ -43,7 +43,7 @@ export async function GET(
     });
   } catch (error: any) {
     console.error('[Sequence] GET error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }
 
@@ -117,7 +117,7 @@ export async function PATCH(
     });
   } catch (error: any) {
     console.error('[Sequence] PATCH error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }
 
@@ -155,7 +155,7 @@ export async function DELETE(
     });
   } catch (error: any) {
     console.error('[Sequence] DELETE error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }
 
@@ -221,7 +221,7 @@ export async function POST(
       } catch (error: any) {
         // Skip if already enrolled or other error
         console.error(`Failed to enroll contact ${contactId}:`, error.message);
-        enrollments.push({ contact_id: contactId, error: error.message });
+        enrollments.push({ contact_id: contactId, error: 'An unexpected error occurred' });
       }
     }
 
@@ -234,6 +234,6 @@ export async function POST(
     });
   } catch (error: any) {
     console.error('[Enroll] POST error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }

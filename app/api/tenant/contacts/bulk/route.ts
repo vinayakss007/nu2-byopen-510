@@ -207,7 +207,7 @@ export async function POST(req: NextRequest) {
   } catch (err: any) {
     console.error('[contacts bulk POST]', err);
     await logError({ error: err, context: 'contacts/bulk', tenantId: ctx?.tenantId });
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }
 

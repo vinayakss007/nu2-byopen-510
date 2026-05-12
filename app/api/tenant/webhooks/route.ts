@@ -28,7 +28,8 @@ export async function GET(req: NextRequest) {
       .orderBy(desc(integrations.createdAt));
 
     return NextResponse.json({ data });
-  } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
+  } catch (err: any) { console.error('[API]', err);
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 }); }
 }
 
 export async function POST(req: NextRequest) {
@@ -59,5 +60,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ 
       data: { ...row, signing_secret: signingSecret, note: 'Save this secret — shown once.' } 
     }, { status: 201 });
-  } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
+  } catch (err: any) { console.error('[API]', err);
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 }); }
 }

@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
+import type { ComponentType } from 'react';
 import { 
   TrendingUp, TrendingDown, Users, DollarSign, FileText, ShoppingCart,
   CheckCircle, Clock, AlertCircle, Calendar, BarChart3, PieChart as PieChartIcon,
@@ -10,12 +11,21 @@ import { cn, formatCurrency, formatDate, formatRelativeTime } from '@/lib/utils'
 import { BarChart, LineChart, DonutChart, Sparkline, ProgressBar } from '@/components/ui/components/charts';
 import toast from 'react-hot-toast';
 
+interface DealData {
+  id: string;
+  title: string;
+  amount: number;
+  stage: string;
+  closeDate: string | null;
+  createdAt: string;
+}
+
 interface Stat {
   label: string;
   value: number;
   change?: number;
   changeLabel?: string;
-  icon: any;
+  icon: ComponentType<{ className?: string }>;
   color: string;
 }
 
@@ -42,8 +52,8 @@ function AnalyticsDashboardInner() {
   const [revenueData, setRevenueData] = useState<{ label: string; value: number }[]>([]);
   const [contactSources, setContactSources] = useState<{ label: string; value: number }[]>([]);
   const [salesFunnel, setSalesFunnel] = useState<{ label: string; value: number }[]>([]);
-  const [topDeals, setTopDeals] = useState<any[]>([]);
-  const [recentActivities, setRecentActivities] = useState<any[]>([]);
+  const [topDeals, setTopDeals] = useState<DealData[]>([]);
+  const [recentActivities, setRecentActivities] = useState<DealData[]>([]);
 
   const fetchAnalytics = async () => {
     setLoading(true);
@@ -68,7 +78,7 @@ function AnalyticsDashboardInner() {
       setRevenueData(revenueRes.data || []);
       
       const sources: Record<string, number> = {};
-      (contactsRes.contacts || []).forEach((c: any) => {
+      (contactsRes.contacts || []).forEach((c) => {
         const source = c.leadSource || 'Direct';
         sources[source] = (sources[source] || 0) + 1;
       });
@@ -82,7 +92,14 @@ function AnalyticsDashboardInner() {
         { label: 'Won', value: 10 },
       ]);
       
-      setTopDeals((dealsRes.deals || []).slice(0, 5));
+      setTopDeals((dealsRes.deals || []).slice(0, 5).map((d: DealData) => ({
+        id: d.id,
+        title: d.title,
+        amount: d.amount || 0,
+        stage: d.stage,
+        closeDate: d.closeDate,
+        createdAt: d.createdAt,
+      })));
     } catch (error) {
       console.error('Failed to fetch analytics', error);
       toast.error('Failed to load analytics');
@@ -266,7 +283,7 @@ function AnalyticsDashboardInner() {
               <button className="text-xs text-violet-600 hover:underline">View all</button>
             </div>
             <div className="divide-y divide-border">
-              {topDeals.length ? topDeals.map((deal: any) => (
+              {topDeals.length ? topDeals.map((deal) => (
                 <div key={deal.id} className="px-5 py-3 flex items-center justify-between hover:bg-accent/30 transition-colors">
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate">{deal.title}</p>

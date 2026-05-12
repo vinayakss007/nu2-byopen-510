@@ -65,7 +65,7 @@ export async function GET(request: NextRequest) {
   } catch (err: any) {
     console.error('[oauth/authorize GET]', err);
     return NextResponse.json(
-      { error: 'server_error', error_description: err.message },
+      { error: 'server_error', error_description: 'Authentication failed' },
       { status: 500 }
     );
   }

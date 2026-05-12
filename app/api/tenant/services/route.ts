@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
       query = query.where(and(eq(services.tenantId, tenantId), like(services.name, `%${search}%`)));
     }
 
-    const results = await query.orderBy(desc(services.createdAt));
+    const results = await query.orderBy(desc(services.createdAt)).limit(100);
     return NextResponse.json({ services: results });
   } catch (error: any) {
     console.error('[services/GET]', error);

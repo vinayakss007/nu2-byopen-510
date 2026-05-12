@@ -581,7 +581,7 @@ export async function POST(request: NextRequest) {
         // Fire outgoing webhooks for created records
         if (result.action === 'created') {
           const eventType = `${item.entity}.created` as WebhookEvent;
-          fireWebhooks(apiKeyRow.tenantId, eventType, { id: result.id }).catch(() => {});
+          fireWebhooks(apiKeyRow.tenantId, eventType, { id: result.id }).catch((whErr: any) => console.error('[inbound] Failed to fire webhook:', whErr.message));
         }
 
         // Log audit entry
@@ -592,7 +592,7 @@ export async function POST(request: NextRequest) {
           resourceType: item.entity,
           resourceId: result.id as string,
           newData: { source: 'inbound_webhook', api_key: apiKeyRow.name },
-        }).catch(() => {});
+        }).catch((auditErr: any) => console.error('[inbound] Failed to log audit:', auditErr.message));
 
         // Log delivery
         logWebhookDelivery({
@@ -608,7 +608,7 @@ export async function POST(request: NextRequest) {
         });
       } catch (err: any) {
         hasError = true;
-        results.push({ entity: item.entity, action: item.action, id: null, status: 'error', error: err.message });
+        results.push({ entity: item.entity, action: item.action, id: null, status: 'error', error: 'An unexpected error occurred' });
 
         logWebhookDelivery({
           tenantId: apiKeyRow.tenantId,
@@ -638,7 +638,7 @@ export async function POST(request: NextRequest) {
         resourceType: 'api',
         resourceId: 'batch',
         newData: { processed: results.length, succeeded: results.filter(r => r.status === 'ok').length, failed: results.filter(r => r.status === 'error').length, duration_ms: duration },
-      }).catch(() => {});
+      }).catch((e: any) => console.error('[webhooks.inbound] Operation failed:', e.message));
     }
 
     // Dev log

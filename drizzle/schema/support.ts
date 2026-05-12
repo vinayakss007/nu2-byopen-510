@@ -63,7 +63,7 @@ export const webhookQueue = pgTable('webhook_queue', {
 // ── 3. FAILED WEBHOOKS ────────────────────────────────
 export const failedWebhooks = pgTable('failed_webhooks', {
   id: utils.pk(),
-  webhookId: uuid('webhook_id').notNull(),
+  webhookId: uuid('webhook_id').notNull().references(() => webhooks.id, { onDelete: 'cascade' }),
   tenantId: utils.tenantId(),
   url: text('url').notNull(),
   payload: jsonb('payload').notNull(),

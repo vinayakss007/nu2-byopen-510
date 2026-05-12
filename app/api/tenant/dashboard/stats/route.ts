@@ -155,7 +155,7 @@ export async function GET(request: NextRequest) {
         recentContacts: [],
         upcomingDeals: [],
       },
-      error: err.message ?? 'Failed to load dashboard',
+      error: 'An unexpected error occurred',
       status: 'error'
     }, { status: 200 });
   }

@@ -39,6 +39,6 @@ export async function POST(request: NextRequest) {
     }
   } catch (err: any) {
     console.error('[email/test]', err);
-    return NextResponse.json({ ok: false, error: err.message }, { status: 500 });
+    return NextResponse.json({ ok: false, error: 'An unexpected error occurred' }, { status: 500 });
   }
 }

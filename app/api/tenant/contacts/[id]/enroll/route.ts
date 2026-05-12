@@ -77,11 +77,12 @@ export async function POST(req: NextRequest, { params }: any) {
     await db.update(sequences)
       .set({ enrollCount: sql`${sequences.enrollCount} + 1` })
       .where(eq(sequences.id, sequence_id))
-      .catch(() => {});
+      .catch((e: any) => console.error('[tenant.contacts.[id].enroll] Operation failed:', e.message));
 
     return NextResponse.json({ data: enrollment }, { status: 201 });
   } catch (err: any) { 
-    return NextResponse.json({ error: err.message }, { status: 500 }); 
+    console.error('[API]', err);
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 }); 
   }
 }
 
@@ -108,6 +109,7 @@ export async function DELETE(req: NextRequest, { params }: any) {
 
     return NextResponse.json({ ok: true });
   } catch (err: any) { 
-    return NextResponse.json({ error: err.message }, { status: 500 }); 
+    console.error('[API]', err);
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 }); 
   }
 }

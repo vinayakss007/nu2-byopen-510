@@ -301,7 +301,7 @@ class DevelopmentLogger {
           Sentry.captureException(err, {
             tags: { context, userId },
           });
-        }).catch(() => {});
+        }).catch((e: any) => console.error('[dev-logger] Operation failed:', e.message));
       }
     }
 

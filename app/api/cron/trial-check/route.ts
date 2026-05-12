@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
               <a href="\${process.env.NEXT_PUBLIC_APP_URL}/tenant/settings/billing" style="display:inline-block;background:#7c3aed;color:#fff;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:600;margin-top:16px">Upgrade Now →</a>
             </div>`,
             text: `Your NuCRM trial for \${t.name} has ended. Upgrade: \${process.env.NEXT_PUBLIC_APP_URL}/tenant/settings/billing`,
-          }).catch(()=>{});
+          }).catch((e: any) => console.error('[cron.trial-check] Operation failed:', e.message));
         }
       }
     }
@@ -99,7 +99,7 @@ export async function POST(request: NextRequest) {
             <a href="\${process.env.NEXT_PUBLIC_APP_URL}/tenant/settings/billing" style="display:inline-block;background:#7c3aed;color:#fff;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:600;margin-top:16px">View Plans →</a>
           </div>`,
           text: `Your NuCRM trial for \${t.name} expires in \${daysLeft} day(s). Upgrade: \${process.env.NEXT_PUBLIC_APP_URL}/tenant/settings/billing`,
-        }).catch(()=>{});
+        }).catch((e: any) => console.error('[cron.trial-check] Operation failed:', e.message));
       }
       // Mark warned
       if (t.ownerId) {
@@ -111,13 +111,13 @@ export async function POST(request: NextRequest) {
           entityType: 'tenant',
           entityId: t.id,
           action: 'trial_warning'
-        }).catch(()=>{});
+        }).catch((e: any) => console.error('[cron.trial-check] Operation failed:', e.message));
       }
     }
 
     return NextResponse.json({ ok:true, expired, warned });
   } catch (err:any) { 
     console.error('[TrialCheck] Error:', err);
-    return NextResponse.json({ error:err.message }, { status:500 }); 
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status:500 }); 
   }
 }

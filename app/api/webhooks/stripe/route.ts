@@ -131,7 +131,7 @@ export async function POST(request: NextRequest) {
           metadata: obj,
         });
         
-        await alertSuperAdmin('Payment Failed', `Stripe event: ${event.id}\nTenant: ${tenantId || 'unknown'}\nAmount: $${(obj.amount || 0) / 100}`).catch(() => {});
+        await alertSuperAdmin('Payment Failed', `Stripe event: ${event.id}\nTenant: ${tenantId || 'unknown'}\nAmount: $${(obj.amount || 0) / 100}`).catch((alertErr: any) => console.error('[stripe] Failed to alert payment failure:', alertErr.message));
         break;
       }
     }
@@ -139,6 +139,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ received: true });
   } catch (err: any) {
     console.error('[stripe webhook]', err.message);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: 'Webhook processing failed' }, { status: 500 });
   }
 }

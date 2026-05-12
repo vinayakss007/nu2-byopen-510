@@ -29,7 +29,8 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ data: formsWithEmbed });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    console.error('[API]', err);
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }
 
@@ -72,6 +73,7 @@ export async function POST(req: NextRequest) {
       data: { ...newForm, embed_code: embedCode, public_url: `${appUrl}/lead-capture?form=${slug}` }
     }, { status: 201 });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    console.error('[API]', err);
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }

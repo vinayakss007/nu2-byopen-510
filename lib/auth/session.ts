@@ -21,6 +21,8 @@ const SESSION_EXPIRES_DAYS = 30;
 export function validatePassword(password: string): string | null {
   if (!password || password.length < 12)
     return 'Password must be at least 12 characters';
+  if (password.length > 128)
+    return 'Password must be at most 128 characters';
   if (!/[A-Z]/.test(password))
     return 'Password must contain at least one uppercase letter';
   if (!/[0-9]/.test(password))
@@ -70,7 +72,7 @@ export async function setSessionCookie(token: string) {
   cookieStore.set(SESSION_COOKIE, token, {
     httpOnly: true,
     secure: process.env.COOKIE_SECURE === 'false' ? false : process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
+    sameSite: 'strict',
     maxAge: SESSION_EXPIRES_DAYS * 24 * 60 * 60,
     path: '/',
   });
@@ -87,7 +89,11 @@ export async function clearSessionCookie() {
 }
 
 // ── Get current user from session ────────────────────────────
-export async function getCurrentUser(): Promise<any | null> {
+export interface CurrentUser {
+  id: string; email: string; fullName: string | null;
+  isSuperAdmin: boolean; avatarUrl: string | null; lastTenantId: string | null;
+}
+export async function getCurrentUser(): Promise<CurrentUser | null> {
   const token = await getSessionToken();
   if (!token) return null;
 

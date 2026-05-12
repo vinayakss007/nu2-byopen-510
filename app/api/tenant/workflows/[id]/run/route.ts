@@ -52,6 +52,6 @@ export async function POST(
     }, { status: 202 });
   } catch (err: any) {
     console.error('[Workflow Run] POST error:', err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }

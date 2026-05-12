@@ -61,6 +61,7 @@ const PUBLIC_PREFIXES = [
 ];
 
 export async function proxy(request: NextRequest) {
+  console.log(`[Proxy] Handling request: ${request.nextUrl.pathname}`);
   const { pathname } = request.nextUrl;
   const origin = request.headers.get('origin');
 

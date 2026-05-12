@@ -19,8 +19,42 @@ import {
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import type { ComponentType } from 'react';
 
-const STATUS_CONFIG: Record<string,{label:string;color:string;dot:string;icon:any}> = {
+interface Contact {
+  id: string;
+  first_name: string;
+  last_name: string;
+  email?: string;
+  phone?: string;
+  company_id?: string;
+  company_name?: string;
+  lead_status: string;
+  lead_source?: string;
+  assigned_to?: string;
+  title?: string;
+  tags?: string[];
+  created_at: string;
+}
+
+interface Company {
+  id: string;
+  name: string;
+}
+
+interface TeamMember {
+  user_id: string;
+  full_name: string;
+}
+
+interface AddContactModalProps {
+  companies: Company[];
+  teamMembers: TeamMember[];
+  onClose: () => void;
+  onSuccess: () => void;
+}
+
+const STATUS_CONFIG: Record<string,{label:string;color:string;dot:string;icon:ComponentType<{className?:string}>}> = {
   new:         { label:'New',          color:'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300',         dot:'bg-slate-400',   icon:Star },
   contacted:   { label:'Contacted',    color:'bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-400',              dot:'bg-sky-500',     icon:Phone },
   qualified:   { label:'Qualified',    color:'bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400',  dot:'bg-violet-500',  icon:CheckCircle },
@@ -42,9 +76,9 @@ const SOURCE_LABELS: Record<string,string> = {
 };
 
 interface Props {
-  initialContacts: any[];
-  companies: any[];
-  teamMembers: any[];
+  initialContacts: Contact[];
+  companies: Company[];
+  teamMembers: TeamMember[];
   permissions: { canCreate:boolean; canEdit:boolean; canDelete:boolean; canViewAll:boolean; canImport?:boolean; canExport?:boolean; canAssign?:boolean };
   totalCount?: number;
   tenantId: string;
@@ -54,7 +88,7 @@ interface Props {
   initialStatus?: string;
 }
 
-function AddContactModal({ companies, teamMembers, onClose, onSuccess }: any) {
+function AddContactModal({ companies, teamMembers, onClose, onSuccess }: AddContactModalProps) {
   const [form,setForm] = useState({first_name:'',last_name:'',email:'',phone:'',company_id:'',lead_status:'new',lead_source:'',assigned_to:'',title:'',tags:''});
   const [saving,setSaving] = useState(false);
   const [dupWarning,setDupWarning] = useState<{id:string}|null>(null);

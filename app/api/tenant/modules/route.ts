@@ -14,7 +14,8 @@ export async function GET(req: NextRequest) {
       return { ...m, status: inst?.status ?? 'available', settings: inst?.settings ?? {}, installed_at: inst?.installed_at ?? null };
     });
     return NextResponse.json({ data: merged });
-  } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
+  } catch (err: any) { console.error('[API]', err);
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 }); }
 }
 
 export async function POST(req: NextRequest) {
@@ -27,7 +28,8 @@ export async function POST(req: NextRequest) {
     const result = await ModuleRegistry.install(ctx.tenantId, module_id, ctx.userId, settings);
     if (!result.ok) return NextResponse.json({ error: result.error }, { status: 400 });
     return NextResponse.json({ ok: true });
-  } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
+  } catch (err: any) { console.error('[API]', err);
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 }); }
 }
 
 export async function PATCH(req: NextRequest) {
@@ -42,5 +44,6 @@ export async function PATCH(req: NextRequest) {
     else if (action === 'enable') await ModuleRegistry.install(ctx.tenantId, module_id, ctx.userId, settings ?? {});
     else return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
     return NextResponse.json({ ok: true });
-  } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
+  } catch (err: any) { console.error('[API]', err);
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 }); }
 }

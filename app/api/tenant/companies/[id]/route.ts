@@ -39,7 +39,7 @@ export async function GET(req: NextRequest, { params }: any) {
     return NextResponse.json({ data: row });
   } catch (err: any) { 
     console.error('[company GET]', err);
-    return NextResponse.json({ error: err.message }, { status: 500 }); 
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 }); 
   }
 }
 
@@ -92,7 +92,7 @@ export async function PATCH(req: NextRequest, { params }: any) {
     return NextResponse.json({ data: row });
   } catch (err: any) { 
     console.error('[company PATCH]', err);
-    return NextResponse.json({ error: err.message }, { status: 500 }); 
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 }); 
   }
 }
 
@@ -131,6 +131,6 @@ export async function DELETE(req: NextRequest, { params }: any) {
     return NextResponse.json({ ok: true, message: 'Moved to trash. Restore within 30 days.' });
   } catch (err: any) { 
     console.error('[company DELETE]', err);
-    return NextResponse.json({ error: err.message }, { status: 500 }); 
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 }); 
   }
 }

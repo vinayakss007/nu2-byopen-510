@@ -116,7 +116,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ data: response });
   } catch (err: any) {
     console.error('[superadmin/stats GET]', err);
-    logError({ error: err, context: 'superadmin stats API' }).catch(() => {});
+    logError({ error: err, context: 'superadmin stats API' }).catch((e: any) => console.error('[superadmin.stats] Operation failed:', e.message));
     return NextResponse.json({ error: 'Failed to fetch platform stats' }, { status: 500 });
   }
 }

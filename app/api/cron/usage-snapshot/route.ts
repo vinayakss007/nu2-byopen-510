@@ -13,6 +13,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: true, snapshots: count });
   } catch (err: any) { 
     console.error('[UsageSnapshot] Error:', err);
-    return NextResponse.json({ error: err.message }, { status: 500 }); 
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 }); 
   }
 }

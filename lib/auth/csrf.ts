@@ -106,9 +106,9 @@ export function isSafeMethod(method: string): boolean {
  * - API key authenticated requests (already secure)
  * - Webhook endpoints (use signature verification)
  */
-export function needsCsrfValidation(method: string, path: string, authMethod?: string): boolean {
+export function needsCsrfValidation(method: string, path: string, authHeader?: string): boolean {
   if (isSafeMethod(method)) return false;
-  if (authMethod === 'api_key') return false;
+  if (authHeader?.startsWith('Bearer ak_')) return false;
   if (path.startsWith('/api/webhooks/')) return false;
   if (path.startsWith('/api/cron/')) return false;
   

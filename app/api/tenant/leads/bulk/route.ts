@@ -177,6 +177,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true, affected, action });
   } catch (err: any) {
     await logError({ error: err, context: 'leads/bulk', tenantId: undefined });
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    console.error('[API]', err);
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }

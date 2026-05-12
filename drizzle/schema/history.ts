@@ -1,14 +1,15 @@
-import { pgTable, uuid, text, timestamp, index } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, timestamp, jsonb, index } from 'drizzle-orm/pg-core';
+import { users } from './core';
 import * as utils from './utils';
 
 export const editHistory = pgTable('edit_history', {
   id: uuid('id').defaultRandom().primaryKey(),
-  tenantId: uuid('tenant_id').notNull(),
+  tenantId: utils.tenantId(),
   
   entityType: text('entity_type').notNull(),
   entityId: uuid('entity_id').notNull(),
   
-  userId: uuid('user_id').notNull(),
+  userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
   userName: text('user_name'),
   userEmail: text('user_email'),
   
@@ -35,7 +36,7 @@ export const editHistory = pgTable('edit_history', {
 
 export const fieldSnapshots = pgTable('field_snapshots', {
   id: uuid('id').defaultRandom().primaryKey(),
-  tenantId: uuid('tenant_id').notNull(),
+  tenantId: utils.tenantId(),
   
   entityType: text('entity_type').notNull(),
   entityId: uuid('entity_id').notNull(),
@@ -43,9 +44,9 @@ export const fieldSnapshots = pgTable('field_snapshots', {
   snapshotType: text('snapshot_type').notNull(),
   snapshotLabel: text('snapshot_label'),
   
-  snapshotData: text('snapshot_data').notNull(),
+  snapshotData: jsonb('snapshot_data').notNull(),
   
-  createdBy: uuid('created_by'),
+  createdBy: uuid('created_by').references(() => users.id, { onDelete: 'set null' }),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
   
   expiresAt: timestamp('expires_at', { withTimezone: true }),
